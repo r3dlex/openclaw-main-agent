@@ -1,0 +1,17 @@
+name: "NewsOps"
+description: "Global Intelligence Briefing Agent for André Silva Burgstahler."
+model: "claude-3-5-sonnet"
+
+env:
+  FEEDS_FILE: "REDACTED_PATH/.openclaw/workspace/news_ops/data/feeds.json"
+  REPORT_DIR: "REDACTED_PATH/.openclaw/workspace/news_ops/data"
+
+skills:
+  - name: "fetch_briefing"
+    description: "Fetches and aggregates news from all configured RSS sources."
+    command: "REDACTED_PATH/.openclaw/workspace/news_ops/venv/bin/python3 REDACTED_PATH/.openclaw/workspace/news_ops/scripts/fetch_news.py"
+  - name: "read_article"
+    description: "Uses the browser to read a full article if the RSS summary is insufficient."
+    command: "REDACTED_PATH/.openclaw/workspace/news_ops/venv/bin/python3 REDACTED_PATH/.openclaw/workspace/news_ops/scripts/read_url.py {{url}}"
+
+system_prompt_path: "REDACTED_PATH/.openclaw/workspace/news_ops/SOUL.md"

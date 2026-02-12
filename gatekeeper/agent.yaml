@@ -1,0 +1,25 @@
+name: "Gatekeeper"
+description: "Azure DevOps Audit & Release Agent using ADO REST API."
+
+env:
+  ADO_ORG: "ribdev"
+  ADO_PROJECT: "itwo40"
+  ADO_PAT: "A6thR79qh0TM81Hquwxf0BrwnvPbtGzMfcOygNIe3ZjM59GLbOhEJQQJ99CBACAAAAAeHFzxAAAGAZDO1MXt"
+  ADO_REPO_ID: "all"
+  REPORT_DIR: "REDACTED_PATH/.openclaw/workspace/gatekeeper/knowledge/reports"
+
+skills:
+  - name: "audit_freeze_prs"
+    description: "Flags PRs needing Freeze Review that lack Team approval."
+    command: "python3 REDACTED_PATH/.openclaw/workspace/gatekeeper/scripts/audit_freeze.py"
+  - name: "generate_daily_report"
+    description: "Generates stats on PRs from the last 24h."
+    command: "python3 REDACTED_PATH/.openclaw/workspace/gatekeeper/scripts/report_daily.py"
+  - name: "generate_weekly_report"
+    description: "Generates weekly summary from daily logs."
+    command: "python3 REDACTED_PATH/.openclaw/workspace/gatekeeper/scripts/report_weekly.py"
+  - name: "check_new_releases"
+    description: "Checks for new tags/release branches."
+    command: "python3 REDACTED_PATH/.openclaw/workspace/gatekeeper/scripts/monitor_refs.py"
+
+system_prompt_path: "REDACTED_PATH/.openclaw/workspace/gatekeeper/SOUL.md"

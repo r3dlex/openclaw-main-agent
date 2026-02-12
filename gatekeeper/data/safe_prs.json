@@ -1,0 +1,128 @@
+[
+  {
+    "id": 40170,
+    "title": "Modified feature registry to always allow overwriting",
+    "author": "Haag, Florian",
+    "score": 10,
+    "reasons": [],
+    "repo": "application",
+    "url": "https://dev.azure.com/ribdev/4220ea73-9afe-4b22-9145-a7603305bbbb/_apis/git/repositories/539f64b4-69e9-4280-91f4-60aa0096aead/pullRequests/40170"
+  },
+  {
+    "id": 40169,
+    "title": "Is Default validation deactivated as flags do not support validation correctl...",
+    "author": "B\u00e4deker, Frank",
+    "score": 10,
+    "reasons": [],
+    "repo": "application",
+    "url": "https://dev.azure.com/ribdev/4220ea73-9afe-4b22-9145-a7603305bbbb/_apis/git/repositories/539f64b4-69e9-4280-91f4-60aa0096aead/pullRequests/40169"
+  },
+  {
+    "id": 40167,
+    "title": "Added External_ID for actvity and releationship",
+    "author": "Konstantin Skatchkov",
+    "score": 10,
+    "reasons": [],
+    "repo": "application",
+    "url": "https://dev.azure.com/ribdev/4220ea73-9afe-4b22-9145-a7603305bbbb/_apis/git/repositories/539f64b4-69e9-4280-91f4-60aa0096aead/pullRequests/40167"
+  },
+  {
+    "id": 40162,
+    "title": "Handled usecase - Tooltip-appears even when not hover over icon for more than...",
+    "author": "Rutuja Pawar",
+    "score": 10,
+    "reasons": [],
+    "repo": "application",
+    "url": "https://dev.azure.com/ribdev/4220ea73-9afe-4b22-9145-a7603305bbbb/_apis/git/repositories/539f64b4-69e9-4280-91f4-60aa0096aead/pullRequests/40162"
+  },
+  {
+    "id": 40161,
+    "title": "Handled usecase - Tooltip-appears even when not hover over icon for more than...",
+    "author": "Rutuja Pawar",
+    "score": 10,
+    "reasons": [],
+    "repo": "application",
+    "url": "https://dev.azure.com/ribdev/4220ea73-9afe-4b22-9145-a7603305bbbb/_apis/git/repositories/539f64b4-69e9-4280-91f4-60aa0096aead/pullRequests/40161"
+  },
+  {
+    "id": 40160,
+    "title": "Provide bugfix for BPD_CONTACT_FK (Contact = 0) issue -",
+    "author": "Vishal Chatterjee",
+    "score": 10,
+    "reasons": [],
+    "repo": "application",
+    "url": "https://dev.azure.com/ribdev/4220ea73-9afe-4b22-9145-a7603305bbbb/_apis/git/repositories/539f64b4-69e9-4280-91f4-60aa0096aead/pullRequests/40160"
+  },
+  {
+    "id": 40159,
+    "title": "Provide bugfix for BPD_CONTACT_FK (Contact = 0) issue -",
+    "author": "Vishal Chatterjee",
+    "score": 10,
+    "reasons": [],
+    "repo": "application",
+    "url": "https://dev.azure.com/ribdev/4220ea73-9afe-4b22-9145-a7603305bbbb/_apis/git/repositories/539f64b4-69e9-4280-91f4-60aa0096aead/pullRequests/40159"
+  },
+  {
+    "id": 40158,
+    "title": "Provide bugfix for BPD_CONTACT_FK (Contact = 0) issue -",
+    "author": "Vishal Chatterjee",
+    "score": 10,
+    "reasons": [],
+    "repo": "application",
+    "url": "https://dev.azure.com/ribdev/4220ea73-9afe-4b22-9145-a7603305bbbb/_apis/git/repositories/539f64b4-69e9-4280-91f4-60aa0096aead/pullRequests/40158"
+  },
+  {
+    "id": 40155,
+    "title": "PCM- 4.483 | BPD_BP_BP to External container_Check deleting record",
+    "author": "Parag Misal",
+    "score": 10,
+    "reasons": [],
+    "repo": "application",
+    "url": "https://dev.azure.com/ribdev/4220ea73-9afe-4b22-9145-a7603305bbbb/_apis/git/repositories/539f64b4-69e9-4280-91f4-60aa0096aead/pullRequests/40155"
+  },
+  {
+    "id": 40154,
+    "title": "DEV-62689-Resolve the issue mentioned by Jens in new scenario",
+    "author": "Mangesh Khandave",
+    "score": 10,
+    "reasons": [],
+    "repo": "application",
+    "url": "https://dev.azure.com/ribdev/4220ea73-9afe-4b22-9145-a7603305bbbb/_apis/git/repositories/539f64b4-69e9-4280-91f4-60aa0096aead/pullRequests/40154"
+  },
+  {
+    "id": 40146,
+    "title": "unique id added for footer",
+    "author": "Prathamesh Saraf",
+    "score": 10,
+    "reasons": [],
+    "repo": "application",
+    "url": "https://dev.azure.com/ribdev/4220ea73-9afe-4b22-9145-a7603305bbbb/_apis/git/repositories/539f64b4-69e9-4280-91f4-60aa0096aead/pullRequests/40146"
+  },
+  {
+    "id": 40145,
+    "title": "DEV-19179:multiple selection on meeting module",
+    "author": "Joy Zhu",
+    "score": 10,
+    "reasons": [],
+    "repo": "application",
+    "url": "https://dev.azure.com/ribdev/4220ea73-9afe-4b22-9145-a7603305bbbb/_apis/git/repositories/539f64b4-69e9-4280-91f4-60aa0096aead/pullRequests/40145"
+  },
+  {
+    "id": 40144,
+    "title": "resolved error popup displayed when clicking new record while creating a new WIP entry",
+    "author": "Nachiket Savale",
+    "score": 10,
+    "reasons": [],
+    "repo": "application",
+    "url": "https://dev.azure.com/ribdev/4220ea73-9afe-4b22-9145-a7603305bbbb/_apis/git/repositories/539f64b4-69e9-4280-91f4-60aa0096aead/pullRequests/40144"
+  },
+  {
+    "id": 40137,
+    "title": "DEV-62157-Column spinner added for contract quantity and prev quantity field",
+    "author": "Mangesh Khandave",
+    "score": 10,
+    "reasons": [],
+    "repo": "application",
+    "url": "https://dev.azure.com/ribdev/4220ea73-9afe-4b22-9145-a7603305bbbb/_apis/git/repositories/539f64b4-69e9-4280-91f4-60aa0096aead/pullRequests/40137"
+  }
+]

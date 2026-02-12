@@ -1,0 +1,67 @@
+# --- OpenClaw Core ---
+# Local configuration with secrets
+.env
+.DS_Store
+
+# Agent Memory & Sessions (Crucial to ignore)
+/sessions/
+/logs/
+/knowledge/private/
+/shared_context/reports/
+
+# Workspace specific
+openclaw.json.backup
+*.log
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+# Virtual Environments
+venv/
+.venv/
+env/
+.env/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# --- JavaScript / Node.js ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+dist/
+build/
+.next/
+
+# --- Elixir ---
+/_build
+/cover
+/deps
+/doc
+/.fetch
+erl_crash.dump
+*.ez
+
+# --- Ruby ---
+/.bundle/
+/vendor/bundle
+/lib/bundler/man/
+.rbenv-gemsets
+.ruby-version
+
+# --- Rust ---
+/target
+**/*.rs.bk
+Cargo.lock
+
+# --- IDEs & Editors ---
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- OS Specific ---
+.DS_Store
+Thumbs.db
