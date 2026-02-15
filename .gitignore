@@ -3,6 +3,11 @@
 .env
 .DS_Store
 
+*client_secret*.json
+*client_secret*.yaml
+*client_secret*.yml
+*token*.json
+
 # Agent Memory & Sessions (Crucial to ignore)
 /sessions/
 /logs/
