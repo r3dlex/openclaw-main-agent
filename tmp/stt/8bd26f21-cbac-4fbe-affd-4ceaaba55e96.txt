@@ -1,0 +1,3 @@
+Avaliar se todos os PR estão com a condição adequada e gerar uma tabela dando uma pontuação
+também a cada PR e explicando o que está sendo feito e por que faz sentido e também
+o tamanho do PR.
