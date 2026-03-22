@@ -1,0 +1,16 @@
+services:
+  iamq_bindings:
+    build:
+      context: ./tools/iamq_bindings
+    env_file: .env
+
+  pipeline_runner:
+    build:
+      context: ./tools/pipeline_runner
+    env_file: .env
+
+  arch-cli:
+    build:
+      context: ./tools/arch-cli
+    volumes:
+      - ./.archgate:/app/.archgate

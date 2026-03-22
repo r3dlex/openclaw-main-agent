@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "pipeline-runner"
+version = "0.1.0"
+description = "A CLI tool for running CI/CD pipeline stages"
+authors = ["Openclaw"]
+packages = [{include = "pipeline_runner"}]
+
+[tool.poetry.dependencies]
+python = ">=3.11"
+click = "^8.1"
+pyyaml = "^6.0"
+requests = "^2.31"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0"
+pytest-cov = "^5.0"
+
+[tool.poetry.scripts]
+pipeline-runner = "pipeline_runner.main:cli"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

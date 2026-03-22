@@ -1,0 +1,25 @@
+name: Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy env
+        run: cp .env.example .env
+
+      - name: Build containers
+        run: docker compose build
+
+      - name: Lint IAMQ Bindings
+        run: docker compose run --rm iamq_bindings mix format --check-formatted
+
+      - name: Lint Pipeline Runner
+        run: docker compose run --rm pipeline_runner poetry run ruff check .

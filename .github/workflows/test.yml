@@ -1,0 +1,29 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - name: iamq_bindings
+            command: mix test
+          - name: pipeline_runner
+            command: poetry run pytest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy env
+        run: cp .env.example .env
+
+      - name: Build containers
+        run: docker compose build
+
+      - name: Run ${{ matrix.service.name }} tests
+        run: docker compose run --rm ${{ matrix.service.name }} ${{ matrix.service.command }}

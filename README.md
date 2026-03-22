@@ -1,38 +1,73 @@
-# OpenClaw Workspace
+# Openclaw Main Agent
 
-Personal AI assistant workspace managed by [OpenClaw](https://github.com/openclaw/openclaw).
+The orchestrator agent present in every [Openclaw](https://docs.openclaw.ai/) installation. Monitors all other agents via the Inter-Agent Message Queue (IAMQ), dispatches information to the user, and documents inter-agent interactions.
 
-## 🤖 Robo
+This agent observes, routes, and reports. It performs no direct actions on external systems.
 
-Experimental AI assistant running on Mac mini. See `IDENTITY.md` for details.
+## Prerequisites
 
-## 📁 Structure
+- Docker or Podman. Nothing else.
 
-- `agent_*/` - Agent scripts and configs
-- `memory/` - Daily logs and long-term memory
-- `Backup_Zero/` - Archive for outdated files
+## Setup
 
-## 🔐 Secrets
+```bash
+git clone <repo-url>
+cd openclaw-main-agent
+cp .env.example .env
+# Edit .env with your values
+docker compose build
+docker compose up
+```
 
-This workspace contains sensitive data. Protected via `.gitignore`:
-- `*client_secret*`
-- `*token*.json`
-- `.env`
+## Commands
 
-## 🛠️ Tools
+All commands run inside containers. No local tool installations required.
 
-- Email: IMAP (6 accounts) + Gmail API
-- Calendar: Google Calendar API
-- Azure DevOps: PR auto-approval
-- Messaging: WhatsApp + Telegram
-- Browser: Chrome with Relay extension
+```bash
+# Run Elixir IAMQ binding tests
+docker compose run iamq_bindings mix test
 
-## 📅 Active Cron Jobs
+# Run Python pipeline runner tests
+docker compose run pipeline_runner poetry run pytest
 
-- Email Tidy (hourly)
-- NewsOps Morning/Evening
-- HR Tasks (Mon-Fri)
-- Weekly Archive
+# Run a pipeline stage
+docker compose run pipeline_runner poetry run pipeline-runner test
 
----
-*Automated by Robo 🤖*
+# Manage Architecture Decision Records
+docker compose run arch-cli new "Decision Title"
+docker compose run arch-cli list
+```
+
+## Environment Variables
+
+| Variable | Description | Default |
+|---|---|---|
+| `OPENCLAW_AGENTS_WORKSPACE_DIR` | Path to agents workspace | — |
+| `IAMQ_BASE_URL` | IAMQ server URL | `http://127.0.0.1:18790` |
+| `AGENT_ID` | Agent identifier | `main` |
+| `TELEGRAM_BOT_TOKEN` | Telegram bot token | — |
+| `TELEGRAM_CHAT_ID` | Telegram chat ID | — |
+
+## Architecture
+
+The main agent has three communication layers:
+
+- **IAMQ** (Elixir bindings) — agent-to-agent message backbone
+- **Telegram** — user-facing notifications
+- **Filesystem** — workspace health monitoring
+
+For details, see [spec/ARCHITECTURE.md](spec/ARCHITECTURE.md).
+
+## Project Structure
+
+- `IDENTITY.md`, `SOUL.md`, `BOOT.md`, `BOOTSTRAP.md`, `HEARTBEAT.md`, `TOOLS.md` — Openclaw template files
+- `AGENTS.md` — Agent self-reference (progressive disclosure)
+- `spec/` — Developer reference documentation
+- `tools/` — Containerized tooling (Elixir, Python, arch-cli)
+- `.archgate/adrs/` — Architecture Decision Records
+- `.github/workflows/` — CI/CD pipelines
+
+## Links
+
+- [Openclaw Documentation](https://docs.openclaw.ai/)
+- [IAMQ Protocol](https://github.com/openclaw/openclaw-inter-agent-message-queue)
