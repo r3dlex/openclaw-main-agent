@@ -14,7 +14,8 @@ COPY mix.exs mix.lock* ./
 # Fetch and compile dependencies
 RUN mix deps.get && mix deps.compile
 
-# Copy application source
+# Copy application source and config
+COPY .formatter.exs ./
 COPY lib lib/
 COPY test test/
 
