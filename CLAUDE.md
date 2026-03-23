@@ -17,9 +17,9 @@ docker compose up
 
 See `.env.example` for all required variables. Key ones:
 
-- `IAMQ_BASE_URL` — IAMQ server URL (default: http://127.0.0.1:18790)
+- `IAMQ_HTTP_URL` — IAMQ server URL (default: http://127.0.0.1:18790)
 - `OPENCLAW_AGENTS_WORKSPACE_DIR` — path to the agents workspace
-- `AGENT_ID` — always `main` for this agent
+- `IAMQ_AGENT_ID` — always `main` for this agent
 - Telegram notifications managed by OpenClaw gateway (`~/.openclaw/openclaw.json`)
 
 ## Project Structure

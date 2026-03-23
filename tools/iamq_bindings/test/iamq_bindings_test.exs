@@ -8,16 +8,16 @@ defmodule IamqBindingsTest do
   # ---------------------------------------------------------------------------
 
   describe "Config.base_url/0" do
-    test "returns default when IAMQ_BASE_URL is not set" do
-      System.delete_env("IAMQ_BASE_URL")
+    test "returns default when IAMQ_HTTP_URL is not set" do
+      System.delete_env("IAMQ_HTTP_URL")
       assert Config.base_url() == "http://127.0.0.1:18790"
     end
 
-    test "returns custom URL when IAMQ_BASE_URL is set" do
-      System.put_env("IAMQ_BASE_URL", "http://custom:9999")
+    test "returns custom URL when IAMQ_HTTP_URL is set" do
+      System.put_env("IAMQ_HTTP_URL", "http://custom:9999")
       assert Config.base_url() == "http://custom:9999"
     after
-      System.delete_env("IAMQ_BASE_URL")
+      System.delete_env("IAMQ_HTTP_URL")
     end
   end
 
@@ -31,9 +31,9 @@ defmodule IamqBindingsTest do
   setup do
     # Point at a unique base URL so we can pattern-match in the plug
     test_url = "http://iamq-test-#{System.unique_integer([:positive])}"
-    System.put_env("IAMQ_BASE_URL", test_url)
+    System.put_env("IAMQ_HTTP_URL", test_url)
 
-    on_exit(fn -> System.delete_env("IAMQ_BASE_URL") end)
+    on_exit(fn -> System.delete_env("IAMQ_HTTP_URL") end)
 
     {:ok, base_url: test_url}
   end
