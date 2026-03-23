@@ -25,9 +25,9 @@ Architecture decision records and documentation management.
 ### Telegram
 
 User-facing notifications only. Not for agent-to-agent communication.
-- Bot token: `$TELEGRAM_BOT_TOKEN`
-- Chat ID: `$TELEGRAM_CHAT_ID`
+- Managed by the OpenClaw gateway (bot tokens in `~/.openclaw/openclaw.json`)
 - Use for: anomaly reports, status summaries, escalation alerts
+- Send messages via your OpenClaw messaging channel — the gateway routes to Telegram
 
 ### Filesystem Observation
 

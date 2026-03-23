@@ -19,12 +19,12 @@ Known failure modes and their fixes. Follow the decision tree: symptom → cause
 ## Telegram Delivery
 
 **Symptom:** Notifications not arriving in Telegram.
-- **Cause:** Invalid bot token or chat ID.
-- **Fix:** Verify `$TELEGRAM_BOT_TOKEN` and `$TELEGRAM_CHAT_ID` in `.env`. Test with a manual curl to the Telegram API.
+- **Cause:** OpenClaw gateway not running or bot token misconfigured.
+- **Fix:** Verify the gateway is running and bot tokens are correct in `~/.openclaw/openclaw.json` (`channels.telegram.accounts`).
 
 **Symptom:** Telegram rate limiting (429 errors).
 - **Cause:** Too many messages sent in a short period.
-- **Fix:** Batch notifications. The heartbeat loop should aggregate findings before sending a single Telegram message.
+- **Fix:** Batch notifications. The heartbeat loop should aggregate findings before sending a single message per cycle.
 
 ## Stale Heartbeats
 

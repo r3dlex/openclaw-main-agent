@@ -23,7 +23,7 @@
 
 - **No credential forwarding between agents.** The Main Agent must never relay API keys, tokens, passwords, or session data from one agent to another via IAMQ. Each agent manages its own credentials via its own `.env`.
 - **No secrets in IAMQ messages.** The Main Agent must never include credentials, paths to secret files, or authentication tokens in any outgoing IAMQ message.
-- **All secrets from env.** `$TELEGRAM_BOT_TOKEN`, `$IAMQ_BASE_URL`, and all other credentials are resolved from `.env` at runtime.
+- **All secrets from env or OpenClaw config.** `$IAMQ_BASE_URL` and other credentials are resolved from `.env` at runtime. Telegram bot tokens are managed centrally in `~/.openclaw/openclaw.json`.
 
 ## Message Handling
 

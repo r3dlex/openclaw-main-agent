@@ -45,8 +45,7 @@ docker compose run arch-cli list
 | `OPENCLAW_AGENTS_WORKSPACE_DIR` | Path to agents workspace | — |
 | `IAMQ_BASE_URL` | IAMQ server URL | `http://127.0.0.1:18790` |
 | `AGENT_ID` | Agent identifier | `main` |
-| `TELEGRAM_BOT_TOKEN` | Telegram bot token | — |
-| `TELEGRAM_CHAT_ID` | Telegram chat ID | — |
+| *(Telegram)* | Managed by OpenClaw gateway (`~/.openclaw/openclaw.json`) | — |
 
 ## Architecture
 
