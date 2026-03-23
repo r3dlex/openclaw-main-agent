@@ -1,8 +1,18 @@
 services:
-  iamq_bindings:
-    build:
-      context: ./tools/iamq_bindings
-    env_file: .env
+  # IAMQ sidecar — inter-agent messaging (Elixir/OTP, zero-install)
+  iamq:
+    build: ./iamq
+    restart: unless-stopped
+    environment:
+      IAMQ_HTTP_URL: http://host.docker.internal:18790
+      IAMQ_WS_URL: ws://host.docker.internal:18793/ws
+      IAMQ_AGENT_ID: main
+      IAMQ_AGENT_NAME: Main
+      IAMQ_AGENT_EMOJI: "\U0001F9E0"
+      IAMQ_AGENT_DESC: "Central orchestrator — monitors agents, coordinates tasks, dispatches to user"
+      IAMQ_AGENT_CAPABILITIES: orchestration,task_routing,agent_monitoring,swarm_coordination
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   pipeline_runner:
     build:
