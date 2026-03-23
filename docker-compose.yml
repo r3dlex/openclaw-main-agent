@@ -14,6 +14,12 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
+  iamq_bindings:
+    build:
+      context: ./tools/iamq_bindings
+    profiles:
+      - dev
+
   pipeline_runner:
     build:
       context: ./tools/pipeline_runner
