@@ -11,6 +11,8 @@ services:
       IAMQ_AGENT_EMOJI: "\U0001F9E0"
       IAMQ_AGENT_DESC: "Central orchestrator — monitors agents, coordinates tasks, dispatches to user"
       IAMQ_AGENT_CAPABILITIES: orchestration,task_routing,agent_monitoring,swarm_coordination
+      IAMQ_HEARTBEAT_MS: "300000"
+      IAMQ_POLL_MS: "60000"
     extra_hosts:
       - "host.docker.internal:host-gateway"
 

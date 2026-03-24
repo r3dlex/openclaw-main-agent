@@ -23,12 +23,9 @@ Execute this loop on each heartbeat cycle:
    - Error logs or crash dumps
    - Unusual file activity patterns
 
-5. **Report to user** — send a summary to the user via Telegram after EVERY heartbeat cycle, not just when anomalies are found:
-   - Telegram is the human visibility layer — the user CANNOT see IAMQ messages
-   - IAMQ is the inter-agent backbone — never substitute one for the other
-   - If notable events occurred: summarize agent activity, anomalies, and status changes.
-     Example: "Heartbeat: 8/9 agents online. Mail Agent filed 12 emails. Journalist published briefing. GitRepo evaluated 2 PRs."
-   - If nothing happened: a brief "All agents online and healthy. No notable events." is fine.
-   - Errors, agent crashes, stale heartbeats: report IMMEDIATELY, don't wait for the cycle to finish.
-
-6. **Stay concise** — the user wants to know what's happening, not get spammed. One summary per cycle is ideal. Only skip reporting entirely if truly nothing happened AND the last report was recent (within the hour).
+5. **Report to user** — send a Telegram summary ONLY when there's something worth reporting:
+   - Notable events: agent state changes, completed tasks, processed messages.
+     Example: "8/9 agents online. Mail Agent filed 12 emails. Journalist published briefing."
+   - Errors, crashes, stale heartbeats: report IMMEDIATELY.
+   - Do NOT send a message if nothing happened. Silent heartbeats are fine — the user trusts the system is working unless told otherwise.
+   - At most one summary per heartbeat cycle. Batch events into a single message.
