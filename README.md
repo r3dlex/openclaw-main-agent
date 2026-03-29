@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo.svg" alt="Main Agent logo" width="96" height="96">
+</p>
+
 # Openclaw Main Agent
 
 The orchestrator agent present in every [Openclaw](https://docs.openclaw.ai/) installation. Monitors all other agents via the Inter-Agent Message Queue (IAMQ), dispatches information to the user, and documents inter-agent interactions.
