@@ -1,7 +1,72 @@
 defmodule IamqBindingsTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   alias IamqBindings.Config
+
+  # ---------------------------------------------------------------------------
+  # Minimal TCP mock-HTTP server
+  #
+  # Starts a `:gen_tcp` listener, accepts one connection, writes a predefined
+  # HTTP/1.1 response, then closes. Returns the port it is listening on.
+  # ---------------------------------------------------------------------------
+
+  defp start_mock_server(response_lines) do
+    response = Enum.join(response_lines, "\r\n") <> "\r\n"
+    parent = self()
+
+    {:ok, listen_socket} =
+      :gen_tcp.listen(0, [:binary, packet: :raw, active: false, reuseaddr: true])
+
+    {:ok, port} = :inet.port(listen_socket)
+
+    spawn(fn ->
+      {:ok, client} = :gen_tcp.accept(listen_socket)
+      # Drain the incoming request so the client doesn't get a connection-reset
+      :gen_tcp.recv(client, 0, 2_000)
+      :gen_tcp.send(client, response)
+      :gen_tcp.close(client)
+      :gen_tcp.close(listen_socket)
+      send(parent, :mock_server_done)
+    end)
+
+    port
+  end
+
+  defp json_200(body_map) do
+    body = Jason.encode!(body_map)
+
+    [
+      "HTTP/1.1 200 OK",
+      "Content-Type: application/json",
+      "Content-Length: #{byte_size(body)}",
+      "Connection: close",
+      "",
+      body
+    ]
+  end
+
+  defp json_422(body_map) do
+    body = Jason.encode!(body_map)
+
+    [
+      "HTTP/1.1 422 Unprocessable Entity",
+      "Content-Type: application/json",
+      "Content-Length: #{byte_size(body)}",
+      "Connection: close",
+      "",
+      body
+    ]
+  end
+
+  defp with_mock_url(port, fun) do
+    System.put_env("IAMQ_HTTP_URL", "http://127.0.0.1:#{port}")
+
+    try do
+      fun.()
+    after
+      System.delete_env("IAMQ_HTTP_URL")
+    end
+  end
 
   # ---------------------------------------------------------------------------
   # Config tests
@@ -21,11 +86,23 @@ defmodule IamqBindingsTest do
     end
   end
 
+  describe "Config.agent_id/0" do
+    test "returns default when IAMQ_AGENT_ID is not set" do
+      System.delete_env("IAMQ_AGENT_ID")
+      assert Config.agent_id() == "main"
+    end
+
+    test "returns custom agent_id when IAMQ_AGENT_ID is set" do
+      System.put_env("IAMQ_AGENT_ID", "custom-agent")
+      assert Config.agent_id() == "custom-agent"
+    after
+      System.delete_env("IAMQ_AGENT_ID")
+    end
+  end
+
   # ---------------------------------------------------------------------------
-  # Request-construction tests
-  #
-  # These tests use a Req test plug to intercept HTTP calls and verify the
-  # request URL, method, headers, and body without needing a running server.
+  # Connection-error tests verify that each function targets the right
+  # endpoint and returns {:error, _} when no server is listening.
   # ---------------------------------------------------------------------------
 
   setup do
@@ -38,21 +115,50 @@ defmodule IamqBindingsTest do
     {:ok, base_url: test_url}
   end
 
-  # ---------------------------------------------------------------------------
-  # Connection-error tests verify that each function targets the right
-  # endpoint and returns {:error, _} when no server is listening.
-  # ---------------------------------------------------------------------------
-
   describe "register/5" do
     test "calls POST /register and returns error tuple on connection failure", %{base_url: _} do
-      # With no server listening, we expect a connection error
       assert {:error, _reason} = IamqBindings.register("a1", "Agent", "🤖", "desc", ["cap1"])
+    end
+
+    test "returns {:ok, body} on 2xx response" do
+      port = start_mock_server(json_200(%{ok: true, agent_id: "a1"}))
+
+      with_mock_url(port, fn ->
+        assert {:ok, body} = IamqBindings.register("a1", "Agent", "🤖", "desc", ["cap1"])
+        assert is_map(body)
+      end)
+    end
+
+    test "returns {:error, {status, body}} on non-2xx response" do
+      port = start_mock_server(json_422(%{error: "already registered"}))
+
+      with_mock_url(port, fn ->
+        assert {:error, {422, _body}} =
+                 IamqBindings.register("a1", "Agent", "🤖", "desc", ["cap1"])
+      end)
     end
   end
 
   describe "heartbeat/1" do
     test "calls POST /heartbeat and returns error tuple on connection failure" do
       assert {:error, _reason} = IamqBindings.heartbeat("a1")
+    end
+
+    test "returns {:ok, body} on 2xx response" do
+      port = start_mock_server(json_200(%{ok: true}))
+
+      with_mock_url(port, fn ->
+        assert {:ok, body} = IamqBindings.heartbeat("a1")
+        assert is_map(body)
+      end)
+    end
+
+    test "returns {:error, {status, body}} on non-2xx response" do
+      port = start_mock_server(json_422(%{error: "agent not found"}))
+
+      with_mock_url(port, fn ->
+        assert {:error, {422, _body}} = IamqBindings.heartbeat("a1")
+      end)
     end
   end
 
@@ -70,6 +176,26 @@ defmodule IamqBindingsTest do
       assert {:error, _reason} =
                IamqBindings.send_message("from_a", "to_b", "subject", "body")
     end
+
+    test "returns {:ok, body} on 2xx response" do
+      port = start_mock_server(json_200(%{ok: true, message_id: "msg-1"}))
+
+      with_mock_url(port, fn ->
+        assert {:ok, body} =
+                 IamqBindings.send_message("from_a", "to_b", "subject", "body", priority: "high")
+
+        assert is_map(body)
+      end)
+    end
+
+    test "returns {:error, {status, body}} on non-2xx response" do
+      port = start_mock_server(json_422(%{error: "invalid recipient"}))
+
+      with_mock_url(port, fn ->
+        assert {:error, {422, _body}} =
+                 IamqBindings.send_message("from_a", "to_b", "subject", "body")
+      end)
+    end
   end
 
   describe "poll_inbox/2" do
@@ -80,11 +206,45 @@ defmodule IamqBindingsTest do
     test "accepts custom status" do
       assert {:error, _reason} = IamqBindings.poll_inbox("a1", "read")
     end
+
+    test "returns {:ok, body} on 2xx response" do
+      port = start_mock_server(json_200([%{id: "msg-1", subject: "hello"}]))
+
+      with_mock_url(port, fn ->
+        assert {:ok, body} = IamqBindings.poll_inbox("a1")
+        assert is_list(body)
+      end)
+    end
+
+    test "returns {:error, {status, body}} on non-2xx response" do
+      port = start_mock_server(json_422(%{error: "agent not found"}))
+
+      with_mock_url(port, fn ->
+        assert {:error, {422, _body}} = IamqBindings.poll_inbox("a1")
+      end)
+    end
   end
 
   describe "mark_message/2" do
     test "calls PATCH /messages/:id and returns error tuple on connection failure" do
       assert {:error, _reason} = IamqBindings.mark_message("msg-1", "read")
+    end
+
+    test "returns {:ok, body} on 2xx response" do
+      port = start_mock_server(json_200(%{ok: true, message_id: "msg-1", status: "read"}))
+
+      with_mock_url(port, fn ->
+        assert {:ok, body} = IamqBindings.mark_message("msg-1", "read")
+        assert is_map(body)
+      end)
+    end
+
+    test "returns {:error, {status, body}} on non-2xx response" do
+      port = start_mock_server(json_422(%{error: "message not found"}))
+
+      with_mock_url(port, fn ->
+        assert {:error, {422, _body}} = IamqBindings.mark_message("msg-1", "read")
+      end)
     end
   end
 
@@ -92,17 +252,68 @@ defmodule IamqBindingsTest do
     test "calls GET /agents and returns error tuple on connection failure" do
       assert {:error, _reason} = IamqBindings.list_agents()
     end
+
+    test "returns {:ok, body} on 2xx response" do
+      port = start_mock_server(json_200([%{agent_id: "a1", name: "Agent One"}]))
+
+      with_mock_url(port, fn ->
+        assert {:ok, body} = IamqBindings.list_agents()
+        assert is_list(body)
+      end)
+    end
+
+    test "returns {:error, {status, body}} on non-2xx response" do
+      port = start_mock_server(json_422(%{error: "forbidden"}))
+
+      with_mock_url(port, fn ->
+        assert {:error, {422, _body}} = IamqBindings.list_agents()
+      end)
+    end
   end
 
   describe "get_agent/1" do
     test "calls GET /agents/:agent_id and returns error tuple on connection failure" do
       assert {:error, _reason} = IamqBindings.get_agent("a1")
     end
+
+    test "returns {:ok, body} on 2xx response" do
+      port = start_mock_server(json_200(%{agent_id: "a1", name: "Agent One"}))
+
+      with_mock_url(port, fn ->
+        assert {:ok, body} = IamqBindings.get_agent("a1")
+        assert is_map(body)
+      end)
+    end
+
+    test "returns {:error, {status, body}} on non-2xx response" do
+      port = start_mock_server(json_422(%{error: "agent not found"}))
+
+      with_mock_url(port, fn ->
+        assert {:error, {422, _body}} = IamqBindings.get_agent("a1")
+      end)
+    end
   end
 
   describe "health/0" do
     test "calls GET /status and returns error tuple on connection failure" do
       assert {:error, _reason} = IamqBindings.health()
+    end
+
+    test "returns {:ok, body} on 2xx response" do
+      port = start_mock_server(json_200(%{status: "ok"}))
+
+      with_mock_url(port, fn ->
+        assert {:ok, body} = IamqBindings.health()
+        assert is_map(body)
+      end)
+    end
+
+    test "returns {:error, {status, body}} on non-2xx response" do
+      port = start_mock_server(json_422(%{error: "service unavailable"}))
+
+      with_mock_url(port, fn ->
+        assert {:error, {422, _body}} = IamqBindings.health()
+      end)
     end
   end
 

@@ -8,7 +8,7 @@ defmodule IamqBindings.MixProject do
       elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      test_coverage: [summary: [threshold: 75]]
+      test_coverage: [summary: [threshold: 90]]
     ]
   end
 
