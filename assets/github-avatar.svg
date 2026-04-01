@@ -1,4 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
+  <circle cx="250" cy="250" r="230" fill="#2C3E50" opacity="0.12"/>
+  <circle cx="250" cy="250" r="230" fill="none" stroke="#2C3E50" stroke-width="3" opacity="0.3"/>
+  <g transform="translate(70, 70) scale(2.8)">
   <!-- Tail -->
   <polygon points="64,96 54,112 74,112" fill="#E8453C"/>
   <polygon points="64,108 58,118 70,118" fill="#D63C34"/>
@@ -40,4 +43,5 @@
   <!-- Conductor baton in right claw -->
   <line x1="100" y1="40" x2="116" y2="20" stroke="#4A3728" stroke-width="2" stroke-linecap="round"/>
   <circle cx="116" cy="19" r="2" fill="white"/>
+  </g>
 </svg>
