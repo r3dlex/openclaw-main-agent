@@ -133,7 +133,8 @@ defmodule IamqBindingsTest do
       port = start_mock_server(json_422(%{error: "already registered"}))
 
       with_mock_url(port, fn ->
-        assert {:error, {422, _body}} = IamqBindings.register("a1", "Agent", "🤖", "desc", ["cap1"])
+        assert {:error, {422, _body}} =
+                 IamqBindings.register("a1", "Agent", "🤖", "desc", ["cap1"])
       end)
     end
   end
@@ -181,9 +182,7 @@ defmodule IamqBindingsTest do
 
       with_mock_url(port, fn ->
         assert {:ok, body} =
-                 IamqBindings.send_message("from_a", "to_b", "subject", "body",
-                   priority: "high"
-                 )
+                 IamqBindings.send_message("from_a", "to_b", "subject", "body", priority: "high")
 
         assert is_map(body)
       end)
