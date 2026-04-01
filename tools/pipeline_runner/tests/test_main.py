@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 import textwrap
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 from click.testing import CliRunner
@@ -225,16 +225,11 @@ class TestStderrAndExceptions:
 
     def test_setup_logging_verbose(self) -> None:
         """_setup_logging with verbose=True sets DEBUG level."""
-        import logging
-
         _setup_logging(verbose=True)
-        root_logger = logging.getLogger("pipeline_runner")
         # Just verify it runs without error; level is set on root logger
         assert True
 
     def test_setup_logging_default(self) -> None:
         """_setup_logging with verbose=False (default) sets INFO level."""
-        import logging
-
         _setup_logging(verbose=False)
         assert True
