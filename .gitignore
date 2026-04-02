@@ -26,6 +26,12 @@ pip-log.txt
 /.fetch
 erl_crash.dump
 *.ez
+*.beam
+.elixir_ls/
+.lexical/
+priv/plts/
+*.plt
+*.plt.hash
 
 # --- Node.js ---
 node_modules/
