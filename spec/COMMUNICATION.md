@@ -112,6 +112,9 @@ Telegram is for humans. IAMQ is for agents. Never substitute one for the other.
 - Architecture: [ARCHITECTURE.md](ARCHITECTURE.md)
 - Safety: [SAFETY.md](SAFETY.md)
 - Testing: [TESTING.md](TESTING.md)
+- [IAMQ HTTP API](https://github.com/r3dlex/openclaw-inter-agent-message-queue/blob/main/spec/API.md)
+- [IAMQ Cron Scheduling](https://github.com/r3dlex/openclaw-inter-agent-message-queue/blob/main/spec/CRON.md)
+- [IAMQ Sidecar Client (iamq_sidecar)](https://github.com/r3dlex/openclaw-inter-agent-message-queue/tree/main/sidecar)
 
 ---
 *Owner: main*

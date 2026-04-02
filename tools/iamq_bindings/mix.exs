@@ -13,8 +13,8 @@ defmodule IamqBindings.MixProject do
       docs: [
         main: "IamqBindings",
         extras:
-          (if File.exists?("README.md"), do: ["README.md"], else: []) ++
-            (if File.exists?("spec"), do: Path.wildcard("spec/*.md"), else: []),
+          if(File.exists?("README.md"), do: ["README.md"], else: []) ++
+            if(File.exists?("spec"), do: Path.wildcard("spec/*.md"), else: []),
         output: "doc/",
         formatters: ["html"]
       ],
