@@ -67,3 +67,9 @@ docker compose run pipeline_runner python -m main_agent.health_check
 ---
 
 **Related:** `spec/API.md`, `spec/COMMUNICATION.md`, `spec/ARCHITECTURE.md`
+
+## References
+
+- [IAMQ Cron Subsystem](https://github.com/r3dlex/openclaw-inter-agent-message-queue/blob/main/spec/CRON.md)
+- [IAMQ API Reference](https://github.com/r3dlex/openclaw-inter-agent-message-queue/blob/main/spec/API.md)
+- [IAMQ Sidecar (register_cron/3)](https://github.com/r3dlex/openclaw-inter-agent-message-queue/tree/main/sidecar)

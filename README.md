@@ -47,7 +47,7 @@ docker compose run arch-cli list
 | Variable | Description | Default |
 |---|---|---|
 | `OPENCLAW_AGENTS_WORKSPACE_DIR` | Path to agents workspace | — |
-| `IAMQ_BASE_URL` | IAMQ server URL | `http://127.0.0.1:18790` |
+| `IAMQ_BASE_URL` | IAMQ server base URL (see [openclaw-inter-agent-message-queue](https://github.com/r3dlex/openclaw-inter-agent-message-queue)) | `http://127.0.0.1:18790` |
 | `AGENT_ID` | Agent identifier | `main` |
 | *(Telegram)* | Managed by OpenClaw gateway (`~/.openclaw/openclaw.json`) | — |
 
@@ -72,5 +72,23 @@ For details, see [spec/ARCHITECTURE.md](spec/ARCHITECTURE.md).
 
 ## Links
 
+### Core Infrastructure
+- [openclaw-inter-agent-message-queue](https://github.com/r3dlex/openclaw-inter-agent-message-queue) — Inter-Agent Message Queue (IAMQ): HTTP + WebSocket message bus, agent registry, cron scheduler
+
+### Agents
+| Agent | Repo | Purpose |
+|---|---|---|
+| `claude_agent` | [openclaw-agent-claude](https://github.com/r3dlex/openclaw-agent-claude) | Claude AI orchestrator |
+| `tempo_agent` | [openclaw-ai-tempo-agent](https://github.com/r3dlex/openclaw-ai-tempo-agent) | AI usage analytics |
+| `gitrepo_agent` | [openclaw-gitrepo-agent](https://github.com/r3dlex/openclaw-gitrepo-agent) | Git repo monitoring |
+| `health_agent` | [openclaw-health-fitness](https://github.com/r3dlex/openclaw-health-fitness) | Health & fitness tracking |
+| `instagram_agent` | [openclaw-instagram-agent](https://github.com/r3dlex/openclaw-instagram-agent) | Instagram engagement |
+| `journalist_agent` | [openclaw-journalist-agent](https://github.com/r3dlex/openclaw-journalist-agent) | News briefings |
+| `librarian_agent` | [openclaw-librarian-agent](https://github.com/r3dlex/openclaw-librarian-agent) | Document indexing (Obsidian) |
+| `mail_agent` | [openclaw-mail-agent](https://github.com/r3dlex/openclaw-mail-agent) | Email management |
+| `podcast_agent` | [openclaw-podcast-agent](https://github.com/r3dlex/openclaw-podcast-agent) | Podcast production |
+| `sysadmin_agent` | [openclaw-sysadmin-agent](https://github.com/r3dlex/openclaw-sysadmin-agent) | System administration |
+| `workday_agent` | [openclaw-workday-agent](https://github.com/r3dlex/openclaw-workday-agent) | Workday HR automation |
+
+### Documentation
 - [Openclaw Documentation](https://docs.openclaw.ai/)
-- [IAMQ Protocol](https://github.com/openclaw/openclaw-inter-agent-message-queue)
