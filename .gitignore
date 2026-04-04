@@ -53,3 +53,10 @@ Thumbs.db
 # --- Temp & Output ---
 tmp/
 *.tmp
+
+# Build artifacts
+tools/iamq_bindings/_build/
+tools/iamq_bindings/cover/
+tools/iamq_bindings/deps/
+tools/iamq_bindings/doc/
+tools/pipeline_runner/.coverage
