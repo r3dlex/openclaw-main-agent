@@ -2,6 +2,7 @@ services:
   iamq:
     build: ./iamq
     restart: unless-stopped
+    env_file: .env
     environment:
       IAMQ_HTTP_URL: http://host.docker.internal:18790
       IAMQ_WS_URL: ws://host.docker.internal:18793/ws
@@ -10,8 +11,21 @@ services:
       IAMQ_AGENT_EMOJI: "🧠"
       IAMQ_AGENT_DESC: "Orchestrator: monitors all agents via IAMQ, dispatches info to user via Telegram"
       IAMQ_AGENT_CAPABILITIES: orchestrate,monitor_agents,dispatch_notifications,document_interactions
+      OPENCLAW_GATEWAY_URL: ws://host.docker.internal:18789/ws
+      OPENCLAW_GATEWAY_TOKEN: ${OPENCLAW_GATEWAY_TOKEN}
+      OPENCLAW_TELEGRAM_ACCOUNT: oc_gr_mq_bot
+      IAMQ_USE_DEVICE_IDENTITY_FILE: "false"
+      OPENCLAW_ALLOW_INSECURE_PRIVATE_WS: "1"
+      HOME: /root
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    volumes:
+      - ~/.openclaw/identity:/root/.openclaw/identity:rw
+      # Use the registered IAMQ identity for gateway WS auth (deviceId=7b0a6b7a...)
+      - ~/.openclaw/iamq-device-identity.json:/root/.openclaw/iamq-device-identity.json:ro
+      - ~/.openclaw/openclaw.json:/root/.openclaw/openclaw.json:ro
+      - ~/.openclaw/auth-profiles.json:/root/.openclaw/auth-profiles.json:ro
+      - ~/.openclaw/agents/main/agent/auth-profiles.json:/root/.openclaw/agents/main/agent/auth-profiles.json:ro
 
   iamq_bindings:
     build:

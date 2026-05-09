@@ -1,0 +1,13 @@
+{
+  "name": "agent_status_check",
+  "version": 1,
+  "quality_score": 0.5,
+  "description": "Check status of all registered agents via IAMQ",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "agent_filter": {"type": "string", "description": "Filter agents by name pattern or 'all' for all agents", "default": "all"}
+    },
+    "required": []
+  }
+}

@@ -65,6 +65,7 @@ defmodule IamqSidecar.MqWsClient do
     end
   end
 
+  @impl true
   def handle_frame(_other, state), do: {:ok, state}
 
   @impl true
@@ -74,11 +75,13 @@ defmodule IamqSidecar.MqWsClient do
     {:reply, {:text, frame}, state}
   end
 
+  @impl true
   def handle_info(:send_heartbeat, state) do
     Process.send_after(self(), :send_heartbeat, @heartbeat_interval)
     {:reply, {:text, Jason.encode!(%{action: "heartbeat"})}, state}
   end
 
+  @impl true
   def handle_info(_msg, state), do: {:ok, state}
 
   @impl true
@@ -100,6 +103,9 @@ defmodule IamqSidecar.MqWsClient do
     msg_id = msg["id"]
 
     Logger.info("[MQ-WS] #{msg_type} from #{from}: #{subject}")
+
+    # Forward to Telegram via OpenClaw gateway
+    IamqSidecar.Gateway.Client.send_telegram(msg)
 
     if msg_id do
       try do

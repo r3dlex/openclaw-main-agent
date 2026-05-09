@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"# Test if the signature from the new IAMQ identity can be verified by Node.js\\nnode -e \\\"\\nconst crypto = require('crypto');\\nconst ED25519_SPKI_PREFIX = Buffer.from('302a300506032b6570032...",
+  "error": "Exit code 1\nnode:internal/crypto/keys:797\n    handle.init(kKeyTypePrivate, data, format, type, passphrase);\n           ^\n\nError: error:0680009B:asn1 encoding routines::too long\n    at Object.createPrivateKey (node:internal/crypto/keys:797:12)\n    at [eval]:18:24\n    at [eval]:43:4\n    at runScriptInThisContext (node:internal/vm:219:10)\n    at node:internal/process/execution:483:12\n    at [eval]-wrapper:6:24\n    at runScriptInContext (node:internal/process/execution:481:60)\n    at evalFunction (n...",
+  "timestamp": "2026-04-14T16:29:27.607Z",
+  "retry_count": 1
+}

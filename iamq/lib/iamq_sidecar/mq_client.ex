@@ -206,6 +206,11 @@ defmodule IamqSidecar.MqClient do
     {:noreply, state}
   end
 
+  # Handle DOWN messages from spawned processes (e.g., gateway RPC clients)
+  def handle_info({:DOWN, _ref, :process, _pid, _reason}, state) do
+    {:noreply, state}
+  end
+
   # --- handle_call ---
 
   @impl true
@@ -308,6 +313,7 @@ defmodule IamqSidecar.MqClient do
     msg_id = msg["id"]
 
     Logger.info("[MQ] Received #{msg_type} from #{from}: #{subject}")
+    IamqSidecar.Gateway.Client.send_telegram(msg)
     if msg_id, do: do_ack(c, msg_id, "read")
   end
 

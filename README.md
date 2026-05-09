@@ -4,15 +4,41 @@
 
 # Openclaw Main Agent
 
-The orchestrator agent present in every [Openclaw](https://docs.openclaw.ai/) installation. Monitors all other agents via the Inter-Agent Message Queue (IAMQ), dispatches information to the user, and documents inter-agent interactions.
+The orchestrator present in every [Openclaw](https://docs.openclaw.ai/) installation. Monitors all other agents via the Inter-Agent Message Queue (IAMQ), dispatches information to the user via Telegram, and documents inter-agent interactions. This agent observes, routes, and reports — it performs no direct actions on external systems.
 
-This agent observes, routes, and reports. It performs no direct actions on external systems.
+## Features
 
-## Prerequisites
+- Monitors all registered agents via IAMQ heartbeat and inbox polling
+- Dispatches notifications to the user via Telegram
+- Documents inter-agent interactions to the workspace filesystem
+- Workspace health monitoring across the agent swarm
 
-- Docker or Podman. Nothing else.
+## Skills
+
+| Skill | Description |
+|-------|-------------|
+| `agent_status_check` | Queries IAMQ to report online/offline status of all registered agents |
+
+Skills are stored in `skills/` and auto-improve via post-execution hooks and nightly batch processing. Workspace-level skills (`iamq_message_send`, `log_learning`, `improve_skill`) are available via the shared `../skills` volume.
+
+## Architecture
+
+- **Language**: Elixir
+- **IAMQ ID**: `main`
+- **Runtime**: HOST-NATIVE (runs directly on the host, not in Docker)
+- **Port**: N/A
+
+### Communication layers
+
+- **IAMQ** (Elixir bindings) — agent-to-agent message backbone
+- **Telegram** — user-facing notifications
+- **Filesystem** — workspace health monitoring
+
+For details, see [spec/ARCHITECTURE.md](spec/ARCHITECTURE.md).
 
 ## Setup
+
+Prerequisites: Docker or Podman. Nothing else.
 
 ```bash
 git clone <repo-url>
@@ -23,72 +49,25 @@ docker compose build
 docker compose up
 ```
 
-## Commands
-
-All commands run inside containers. No local tool installations required.
-
-```bash
-# Run Elixir IAMQ binding tests
-docker compose run iamq_bindings mix test
-
-# Run Python pipeline runner tests
-docker compose run pipeline_runner poetry run pytest
-
-# Run a pipeline stage
-docker compose run pipeline_runner poetry run pipeline-runner test
-
-# Manage Architecture Decision Records
-docker compose run arch-cli new "Decision Title"
-docker compose run arch-cli list
-```
-
 ## Environment Variables
 
-| Variable | Description | Default |
-|---|---|---|
-| `OPENCLAW_AGENTS_WORKSPACE_DIR` | Path to agents workspace | — |
-| `IAMQ_BASE_URL` | IAMQ server base URL (see [openclaw-inter-agent-message-queue](https://github.com/r3dlex/openclaw-inter-agent-message-queue)) | `http://127.0.0.1:18790` |
-| `AGENT_ID` | Agent identifier | `main` |
-| *(Telegram)* | Managed by OpenClaw gateway (`~/.openclaw/openclaw.json`) | — |
+| Variable | Description |
+|----------|-------------|
+| `OPENCLAW_AGENTS_WORKSPACE_DIR` | Path to agents workspace |
+| `IAMQ_HTTP_URL` | IAMQ server base URL (default: `http://127.0.0.1:18790`) |
+| `IAMQ_AGENT_ID` | Always `main` for this agent |
 
-## Architecture
+Telegram notifications are managed by the OpenClaw gateway (`~/.openclaw/openclaw.json`).
 
-The main agent has three communication layers:
+## Volume Mounts
 
-- **IAMQ** (Elixir bindings) — agent-to-agent message backbone
-- **Telegram** — user-facing notifications
-- **Filesystem** — workspace health monitoring
-
-For details, see [spec/ARCHITECTURE.md](spec/ARCHITECTURE.md).
-
-## Project Structure
-
-- `IDENTITY.md`, `SOUL.md`, `BOOT.md`, `BOOTSTRAP.md`, `HEARTBEAT.md`, `TOOLS.md` — Openclaw template files
-- `AGENTS.md` — Agent self-reference (progressive disclosure)
-- `spec/` — Developer reference documentation
-- `tools/` — Containerized tooling (Elixir, Python, arch-cli)
-- `.archgate/adrs/` — Architecture Decision Records
-- `.github/workflows/` — CI/CD pipelines
+| Mount | Purpose |
+|-------|---------|
+| `../skills-cli:/skills-cli:ro` | Shared skills CLI tooling |
+| `../skills:/workspace/skills:rw` | Workspace-level shared skills |
+| `./skills:/agent/skills:rw` | Agent-specific skills |
 
 ## Links
 
-### Core Infrastructure
-- [openclaw-inter-agent-message-queue](https://github.com/r3dlex/openclaw-inter-agent-message-queue) — Inter-Agent Message Queue (IAMQ): HTTP + WebSocket message bus, agent registry, cron scheduler
-
-### Agents
-| Agent | Repo | Purpose |
-|---|---|---|
-| `claude_agent` | [openclaw-agent-claude](https://github.com/r3dlex/openclaw-agent-claude) | Claude AI orchestrator |
-| `tempo_agent` | [openclaw-ai-tempo-agent](https://github.com/r3dlex/openclaw-ai-tempo-agent) | AI usage analytics |
-| `gitrepo_agent` | [openclaw-gitrepo-agent](https://github.com/r3dlex/openclaw-gitrepo-agent) | Git repo monitoring |
-| `health_agent` | [openclaw-health-fitness](https://github.com/r3dlex/openclaw-health-fitness) | Health & fitness tracking |
-| `instagram_agent` | [openclaw-instagram-agent](https://github.com/r3dlex/openclaw-instagram-agent) | Instagram engagement |
-| `journalist_agent` | [openclaw-journalist-agent](https://github.com/r3dlex/openclaw-journalist-agent) | News briefings |
-| `librarian_agent` | [openclaw-librarian-agent](https://github.com/r3dlex/openclaw-librarian-agent) | Document indexing (Obsidian) |
-| `mail_agent` | [openclaw-mail-agent](https://github.com/r3dlex/openclaw-mail-agent) | Email management |
-| `podcast_agent` | [openclaw-podcast-agent](https://github.com/r3dlex/openclaw-podcast-agent) | Podcast production |
-| `sysadmin_agent` | [openclaw-sysadmin-agent](https://github.com/r3dlex/openclaw-sysadmin-agent) | System administration |
-| `workday_agent` | [openclaw-workday-agent](https://github.com/r3dlex/openclaw-workday-agent) | Workday HR automation |
-
-### Documentation
+- [openclaw-inter-agent-message-queue](https://github.com/r3dlex/openclaw-inter-agent-message-queue) — IAMQ backbone
 - [Openclaw Documentation](https://docs.openclaw.ai/)

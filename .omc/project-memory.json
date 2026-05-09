@@ -1,0 +1,181 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1776290592944,
+  "projectRoot": "/Volumes/Cowboy_Alpha/Ws/Openclaw/openclaw-main-agent",
+  "techStack": {
+    "languages": [
+      {
+        "name": "C/C++",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "Makefile"
+        ]
+      }
+    ],
+    "frameworks": [],
+    "packageManager": null,
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": "make build",
+    "testCommand": "make test",
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "assets",
+      "scripts",
+      "spec"
+    ],
+    "gitBranches": {
+      "defaultBranch": "main",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "assets": {
+      "path": "assets",
+      "purpose": "Static assets",
+      "fileCount": 6,
+      "lastAccessed": 1776290592935,
+      "keyFiles": [
+        "banner.svg",
+        "favicon.svg",
+        "github-avatar.svg",
+        "logo-dark.svg",
+        "logo-light.svg"
+      ]
+    },
+    "cron": {
+      "path": "cron",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1776290592935,
+      "keyFiles": []
+    },
+    "iamq": {
+      "path": "iamq",
+      "purpose": null,
+      "fileCount": 3,
+      "lastAccessed": 1776290592935,
+      "keyFiles": [
+        "Dockerfile",
+        "mix.exs"
+      ]
+    },
+    "scripts": {
+      "path": "scripts",
+      "purpose": "Build/utility scripts",
+      "fileCount": 1,
+      "lastAccessed": 1776290592935,
+      "keyFiles": []
+    },
+    "skills": {
+      "path": "skills",
+      "purpose": null,
+      "fileCount": 4,
+      "lastAccessed": 1776290592936,
+      "keyFiles": [
+        "agent_status_check.json",
+        "agent_status_check.md",
+        "agent_status_check.sh"
+      ]
+    },
+    "spec": {
+      "path": "spec",
+      "purpose": "Test specifications",
+      "fileCount": 9,
+      "lastAccessed": 1776290592936,
+      "keyFiles": [
+        "API.md",
+        "ARCHITECTURE.md",
+        "COMMUNICATION.md",
+        "CRON.md",
+        "LEARNINGS.md"
+      ]
+    },
+    "tools": {
+      "path": "tools",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1776290592936,
+      "keyFiles": []
+    },
+    "iamq/lib": {
+      "path": "iamq/lib",
+      "purpose": "Library code",
+      "fileCount": 0,
+      "lastAccessed": 1776290592936,
+      "keyFiles": []
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "iamq/lib/iamq_sidecar/gateway_client.ex",
+      "accessCount": 30,
+      "lastAccessed": 1776184363117,
+      "type": "file"
+    },
+    {
+      "path": "docker-compose.yml",
+      "accessCount": 13,
+      "lastAccessed": 1776181714938,
+      "type": "file"
+    },
+    {
+      "path": "iamq",
+      "accessCount": 6,
+      "lastAccessed": 1776182402294,
+      "type": "directory"
+    },
+    {
+      "path": "iamq/lib",
+      "accessCount": 3,
+      "lastAccessed": 1776182567704,
+      "type": "directory"
+    },
+    {
+      "path": "iamq/lib/iamq_sidecar/mq_ws_client.ex",
+      "accessCount": 3,
+      "lastAccessed": 1776183644000,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 2,
+      "lastAccessed": 1776181045267,
+      "type": "directory"
+    },
+    {
+      "path": "iamq/lib/iamq_sidecar/application.ex",
+      "accessCount": 2,
+      "lastAccessed": 1776182408857,
+      "type": "file"
+    },
+    {
+      "path": "iamq/lib/iamq_sidecar/mq_client.ex",
+      "accessCount": 2,
+      "lastAccessed": 1776182577319,
+      "type": "file"
+    },
+    {
+      "path": "AGENTS.md",
+      "accessCount": 1,
+      "lastAccessed": 1776181429261,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}
