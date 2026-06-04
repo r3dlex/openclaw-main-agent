@@ -18,22 +18,26 @@ The agent registers on startup at `$IAMQ_BASE_URL`.
 }
 ```
 
-## Elixir IAMQ Bindings
+## Elixir IAMQ Sidecar
 
-The Main Agent uses Elixir HTTP bindings (`tools/iamq_bindings/`) to communicate with IAMQ. Available operations:
+The Main Agent uses the Elixir IAMQ sidecar service (in the `iamq/`
+directory, run as the `iamq:` Docker service) to communicate with IAMQ.
+The sidecar uses the shared `IamqSidecar.MqClient` and
+`IamqSidecar.MqWsClient` from
+[`openclaw-shared-base/iamq_sidecar`](https://github.com/r3dlex/openclaw-shared-base).
+
+Available operations:
 
 | Function | Purpose |
 |----------|---------|
 | `register` | Register `main` with IAMQ on startup |
 | `heartbeat` | Send periodic heartbeat to maintain presence |
 | `send_message` | Send a message to a specific agent or broadcast |
-| `poll_inbox` | Fetch unread messages from the main agent's inbox |
-| `mark_message` | Mark a message as read/processed |
-| `list_agents` | Discover all registered agents and their capabilities |
-| `get_agent` | Get a specific agent's profile and status |
-| `health` | Check IAMQ service health |
-
-Run the bindings tests: `docker compose run iamq_bindings mix test`
+| `broadcast` | Broadcast a message to all agents |
+| `inbox` | Fetch unread messages from the main agent's inbox |
+| `ack` | Mark a message as read/processed |
+| `agents` | Discover all registered agents and their capabilities |
+| `status` | Check IAMQ service health |
 
 ## Incoming Messages
 

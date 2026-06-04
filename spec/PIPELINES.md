@@ -16,14 +16,13 @@ Builds container images and runs linting checks.
 
 Runs all test suites inside containers.
 - Triggers: push to main, pull requests
-- Elixir tests: `docker compose run iamq_bindings mix test`
 - Python tests: `docker compose run pipeline_runner poetry run pytest`
 
 ### build.yml
 
 Builds all container images to verify they compile and install correctly.
 - Triggers: push to main, pull requests
-- Builds: iamq_bindings, pipeline_runner, arch-cli
+- Builds: pipeline_runner, arch-cli
 
 ## Pipeline Runner
 
@@ -49,7 +48,6 @@ Run the same pipeline locally that CI runs:
 docker compose build
 
 # Run tests
-docker compose run iamq_bindings mix test
 docker compose run pipeline_runner poetry run pytest
 ```
 

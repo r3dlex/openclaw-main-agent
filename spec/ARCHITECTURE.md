@@ -24,11 +24,17 @@ The Openclaw Main Agent is the orchestrator present in every Openclaw installati
    └──────────┘    └──────────────┘   └──────────┘
 ```
 
-### Elixir IAMQ Bindings
+### Elixir IAMQ Sidecar
 
-HTTP client for the Inter-Agent Message Queue. Handles registration, heartbeats, message sending/receiving, and agent discovery. See [ADR-001](./../.archgate/adrs/001-elixir-for-iamq-bindings.md) for the Elixir choice rationale.
+HTTP/WebSocket client GenServer for the Inter-Agent Message Queue.
+Handles registration, heartbeats, message sending/receiving, and
+agent discovery. Uses the shared `IamqSidecar.MqClient` /
+`IamqSidecar.MqWsClient` package from
+[`openclaw-shared-base/iamq_sidecar`](https://github.com/r3dlex/openclaw-shared-base).
+See [ADR-001](./../.archgate/adrs/001-elixir-for-iamq-bindings.md) for
+the Elixir choice rationale.
 
-Run: `docker compose run iamq_bindings mix test`
+Runs as the `iamq` sidecar service in `docker-compose.yml`.
 
 ### Heartbeat Loop
 

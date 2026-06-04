@@ -2,14 +2,6 @@
 
 All tests run inside containers. Nothing on the host.
 
-## Elixir IAMQ Bindings
-
-```bash
-docker compose run iamq_bindings mix test
-```
-
-Tests cover each IAMQ operation: register, heartbeat, send, poll inbox, mark message, list agents, health check.
-
 ## Python Pipeline Runner
 
 ```bash
@@ -43,6 +35,5 @@ docker compose up -d
 
 ## Adding Tests
 
-- Elixir tests go in `tools/iamq_bindings/test/`
 - Python tests go in `tools/pipeline_runner/tests/`
 - Follow existing patterns: one test file per module, descriptive test names

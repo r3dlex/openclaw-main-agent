@@ -195,7 +195,7 @@ Agents receive this via normal inbox polling or WebSocket push — **no special 
 
 ---
 
-## Registration Pattern — Elixir (using iamq_bindings sidecar)
+## Registration Pattern — Elixir (using IamqSidecar from openclaw-shared-base)
 
 ```elixir
 # In application.ex start/2 or a dedicated Registrar GenServer:
@@ -211,12 +211,16 @@ defmodule MyAgent.IamqRegistrar do
   end
 
   defp register_with_iamq do
-    IamqBindings.register("my_agent", "Agent", "🤖", "What this agent does", ["capability1"])
+    IamqSidecar.MqClient.send_message("my_agent", "my_agent",
+      "register", %{name: "Agent", emoji: "🤖", description: "What this agent does",
+                   capabilities: ["capability1"]})
   end
 
   defp register_crons do
-    IamqBindings.register_cron("daily_task", "0 8 * * *")
-    IamqBindings.register_cron("weekly_report", "0 9 * * 1")
+    IamqSidecar.MqClient.send_message("my_agent", "iamq", "register_cron",
+      %{name: "daily_task", expression: "0 8 * * *"})
+    IamqSidecar.MqClient.send_message("my_agent", "iamq", "register_cron",
+      %{name: "weekly_report", expression: "0 9 * * 1"})
   end
 end
 ```
