@@ -18,8 +18,5 @@ jobs:
       - name: Build containers
         run: docker compose build
 
-      - name: Lint IAMQ Bindings
-        run: docker compose run --rm iamq_bindings mix format --check-formatted
-
       - name: Lint Pipeline Runner
         run: docker compose run --rm pipeline_runner poetry run ruff check .

@@ -12,8 +12,6 @@ jobs:
     strategy:
       matrix:
         service:
-          - name: iamq_bindings
-            command: mix test
           - name: pipeline_runner
             command: poetry run pytest
     steps:
@@ -27,23 +25,3 @@ jobs:
 
       - name: Run ${{ matrix.service.name }} tests
         run: docker compose run --rm ${{ matrix.service.name }} ${{ matrix.service.command }}
-
-  docs:
-    name: Elixir Docs (iamq_bindings)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: tools/iamq_bindings
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: erlef/setup-beam@v1
-        with:
-          elixir-version: "1.15"
-          otp-version: "26"
-
-      - name: Install dependencies
-        run: mix deps.get
-
-      - name: Generate docs
-        run: mix docs

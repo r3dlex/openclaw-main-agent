@@ -27,12 +27,6 @@ services:
       - ~/.openclaw/auth-profiles.json:/root/.openclaw/auth-profiles.json:ro
       - ~/.openclaw/agents/main/agent/auth-profiles.json:/root/.openclaw/agents/main/agent/auth-profiles.json:ro
 
-  iamq_bindings:
-    build:
-      context: ./tools/iamq_bindings
-    profiles:
-      - dev
-
   pipeline_runner:
     build:
       context: ./tools/pipeline_runner

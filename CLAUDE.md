@@ -35,7 +35,6 @@ See `.env.example` for all required variables. Key ones:
 │   ├── TESTING.md                      # How to run tests
 │   └── PIPELINES.md                    # CI/CD documentation
 ├── tools/
-│   ├── iamq_bindings/                  # Elixir IAMQ client
 │   ├── pipeline_runner/                # Python CI/CD module
 │   └── arch-cli/                       # Containerized arch-cli
 ├── .archgate/adrs/                     # Architecture Decision Records
@@ -49,9 +48,6 @@ See `.env.example` for all required variables. Key ones:
 All commands run inside containers:
 
 ```bash
-# Run Elixir tests
-docker compose run iamq_bindings mix test
-
 # Run Python tests
 docker compose run pipeline_runner poetry run pytest
 
@@ -72,7 +68,6 @@ Key separation: IAMQ is the inter-agent backbone. Telegram is the human notifica
 
 ## Extending
 
-- Add IAMQ operations: edit `tools/iamq_bindings/lib/iamq_bindings.ex`
 - Add pipeline stages: edit `tools/pipeline_runner/pipeline_runner/main.py`
 - Record architecture decisions: `docker compose run arch-cli new "Title"`
 - All new tools must be containerized (see ADR-003)

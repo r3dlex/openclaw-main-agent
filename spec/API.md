@@ -76,16 +76,14 @@ pipelines from them — it issues commands and monitors acknowledgements.
 
 ---
 
-## IAMQ Bindings (Elixir)
+## IAMQ Client (Elixir sidecar)
 
-The `tools/iamq_bindings/` Elixir library is the core messaging client used by
-this agent. It wraps IAMQ HTTP calls and provides typed message structs.
-Other agents in the swarm that use Elixir import this library.
+The main agent connects to IAMQ via the Elixir sidecar service in
+`iamq/`, which uses `IamqSidecar.MqClient` and `IamqSidecar.MqWsClient`
+(the shared sidecar package in
+[`openclaw-shared-base/iamq_sidecar`](https://github.com/r3dlex/openclaw-shared-base)).
 
 ```bash
-# Test the bindings
-docker compose run iamq_bindings mix test
-
 # Check swarm status via CLI
 docker compose run pipeline_runner python -m main_agent.status
 ```
