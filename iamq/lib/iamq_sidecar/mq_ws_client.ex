@@ -17,6 +17,7 @@ defmodule IamqSidecar.MqWsClient do
   @heartbeat_interval 30_000
   @reconnect_interval 15_000
 
+  @spec start_link(keyword()) :: {:ok, pid()} | {:error, term()}
   def start_link(_opts) do
     ws_url = System.get_env("IAMQ_WS_URL", @default_ws_url)
     agent_id = System.fetch_env!("IAMQ_AGENT_ID")

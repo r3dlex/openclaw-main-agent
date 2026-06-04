@@ -5,11 +5,13 @@ defmodule IamqSidecar.MixProject do
     [
       app: :iamq_sidecar,
       version: "0.1.0",
-      elixir: "~> 1.16",
+      elixir: "~> 1.18",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       aliases: aliases(),
-      test_coverage: [summary: [threshold: 0]]
+      test_coverage: [summary: [threshold: 90]],
+      description: description(),
+      docs: docs()
     ]
   end
 
@@ -30,7 +32,31 @@ defmodule IamqSidecar.MixProject do
     [
       {:jason, "~> 1.4"},
       {:req, "~> 0.5"},
-      {:websockex, "~> 0.5"}
+      {:websockex, "~> 0.5"},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
+      {:doctor, "~> 0.21", only: [:dev, :test], runtime: false},
+      {:excoveralls, "~> 0.18", only: :test, runtime: false}
+    ]
+  end
+
+  defp description do
+    """
+    IAMQ HTTP + WebSocket sidecar for the OpenClaw main agent.
+
+    Provides a supervised GenServer pair (`IamqSidecar.MqClient` /
+    `IamqSidecar.MqWsClient`) and a Telegram delivery helper
+    (`IamqSidecar.Gateway.Client`) for forwarding inbound IAMQ
+    messages to the OpenClaw gateway.
+    """
+  end
+
+  defp docs do
+    [
+      main: "readme",
+      source_url: "https://github.com/r3dlex/openclaw-main-agent",
+      extras: []
     ]
   end
 end

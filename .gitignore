@@ -32,6 +32,11 @@ erl_crash.dump
 priv/plts/
 *.plt
 *.plt.hash
+iamq/_build/
+iamq/cover/
+iamq/deps/
+iamq/doc/
+iamq/mix.lock
 
 # --- Node.js ---
 node_modules/
