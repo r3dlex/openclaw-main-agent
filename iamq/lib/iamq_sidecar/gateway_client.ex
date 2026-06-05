@@ -442,6 +442,7 @@ defmodule IamqSidecar.Gateway.Client do
     else
       "[IAMQ] #{from}: #{subject}"
     end
+  end
 
   defp format_message(_), do: "[IAMQ] New message received"
 
