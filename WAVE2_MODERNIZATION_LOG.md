@@ -28,7 +28,7 @@ modernization scope for `openclaw-main-agent` per
 | AC-M4 | `mix credo --strict` runs (3 pre-existing refactor ops, non-fatal) | 2 | DONE |
 | AC-M5 | Makefile `ci` target emits JSON sentinel | 2 | DONE |
 | AC-M6 | `.github/workflows/ci.yml` `make-ci` job present | 2 | DONE |
-| AC-T1 | Coverage gate `excoveralls` threshold ≥90% | 2 | CONFIGURED (no tests in repo — see Notes) |
+| AC-T1 | Coverage gate `excoveralls` threshold ≥90% | 2 | DEFERRED[^1] |
 | AC-T2 | Tracking issue closure | 3 | DONE (this PR closes #7) |
 
 ## R4 risk mitigation (green-base on host Elixir 1.19.5)
@@ -90,3 +90,13 @@ directory exists.
 - Sub-PR 3 commit: (this PR)
 
 Closes #7.
+
+[^1]: **AC-T1 status: DEFERRED.** The 90% coverage threshold is
+configured in `iamq/mix.exs` (via `test_coverage: [summary:
+[threshold: 90]]` and the `excoveralls` dep), but until sub-PR 2
+lands there is no `iamq/test/` directory, so the gate is
+silently bypassed. Sub-PR 2 (PR #9) added a 10-test smoke suite
+for the MqClient cron HTTP paths and lowered the threshold to a
+transitional 5% floor (with a comment pointing to the follow-up).
+Driving the floor back to 90% is tracked in
+[r3dlex/openclaw-main-agent#11](https://github.com/r3dlex/openclaw-main-agent/issues/11).
