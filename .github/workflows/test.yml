@@ -14,6 +14,8 @@ jobs:
         service:
           - name: pipeline_runner
             command: poetry run pytest
+          - name: iamq
+            command: mix test --cover
     steps:
       - uses: actions/checkout@v4
 

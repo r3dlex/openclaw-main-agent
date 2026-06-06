@@ -31,7 +31,11 @@ defmodule IamqSidecar.MqClientTest do
         end
 
       response =
-        Req.Response.new(status: 200, body: body, headers: %{"content-type" => "application/json"})
+        Req.Response.new(
+          status: 200,
+          body: body,
+          headers: %{"content-type" => "application/json"}
+        )
 
       {request, response}
     end

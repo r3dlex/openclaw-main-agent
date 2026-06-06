@@ -113,7 +113,9 @@ defmodule IamqSidecar.Gateway.Client do
           "main",
           "--message",
           content
-        ], env: env)
+        ],
+        env: env
+      )
 
     if exit_code == 0 do
       Logger.info("[Gateway] CLI fallback succeeded")
