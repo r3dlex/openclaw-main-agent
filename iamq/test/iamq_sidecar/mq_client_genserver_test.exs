@@ -74,7 +74,8 @@ defmodule IamqSidecar.MqClientGenServerTest do
   end
 
   # Waits for the initial :register cycle (init schedules :register in 2s).
-  defp wait_for_register(ref), do: assert_receive({:bypass_request, ^ref, {"POST", "register"}}, 5_000)
+  defp wait_for_register(ref),
+    do: assert_receive({:bypass_request, ^ref, {"POST", "register"}}, 5_000)
 
   # --- init / register ---------------------------------------------------
 
@@ -100,7 +101,9 @@ defmodule IamqSidecar.MqClientGenServerTest do
       assert state.config.agent_caps == ["cap_a", "cap_b"]
     end
 
-    test "register failure increments consecutive_failures and reschedules in 30s", %{bypass: bypass} do
+    test "register failure increments consecutive_failures and reschedules in 30s", %{
+      bypass: bypass
+    } do
       ref = make_ref()
       test_pid = self()
 
@@ -148,7 +151,9 @@ defmodule IamqSidecar.MqClientGenServerTest do
       assert state.registered == true
     end
 
-    test "5 consecutive failures flip to registered=false and trigger re-register", %{bypass: bypass} do
+    test "5 consecutive failures flip to registered=false and trigger re-register", %{
+      bypass: bypass
+    } do
       ref = make_ref()
       test_pid = self()
 
