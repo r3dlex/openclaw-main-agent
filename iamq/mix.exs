@@ -10,10 +10,10 @@ defmodule IamqSidecar.MixProject do
       deps: deps(),
       aliases: aliases(),
       # Floor for the iamq/ subproject — driven up in the iamq-ratchet
-      # wave (5 -> 25 -> 50 -> 75 -> 90). Each step is a separate PR.
+      # wave (5 -> 25 -> 35 -> 75 -> 90). Each step is a separate PR.
       # See the openclaw-main-agent follow-up issue "iamq/: drive
       # coverage from 5% to 90% (ratchet the floor)".
-      test_coverage: [summary: [threshold: 35]],
+      test_coverage: [summary: [threshold: 75]],
       description: description(),
       docs: docs()
     ]
