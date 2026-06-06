@@ -36,6 +36,7 @@ defmodule IamqSidecar.MqClient do
 
   # --- public API ---
 
+  @spec start_link(keyword()) :: GenServer.on_start()
   def start_link(_opts), do: GenServer.start_link(__MODULE__, %{}, name: __MODULE__)
 
   @doc """
@@ -49,6 +50,8 @@ defmodule IamqSidecar.MqClient do
       - `:enabled`  — boolean, default `true`
       - `:agent_id` — string, override the configured agent_id
   """
+  @spec register_cron(String.t(), String.t(), keyword()) ::
+          {:ok, map()} | {:error, term()}
   def register_cron(name, expression, opts \\ []) do
     url = base_url()
     agent_id = Keyword.get(opts, :agent_id, configured_agent_id())
@@ -70,6 +73,7 @@ defmodule IamqSidecar.MqClient do
   ## Options
     - `:agent_id` — string, override the configured agent_id
   """
+  @spec list_crons(keyword()) :: {:ok, list(map())} | {:error, term()}
   def list_crons(opts \\ []) do
     url = base_url()
     agent_id = Keyword.get(opts, :agent_id, configured_agent_id())
@@ -86,6 +90,7 @@ defmodule IamqSidecar.MqClient do
   Get a single cron schedule by ID.
   Returns `{:ok, cron_entry_map}` or `{:error, reason}`.
   """
+  @spec get_cron(String.t()) :: {:ok, map()} | {:error, term()}
   def get_cron(cron_id) do
     url = base_url()
 
@@ -100,6 +105,7 @@ defmodule IamqSidecar.MqClient do
   Enable or disable a cron schedule.
   Returns `{:ok, updated_cron_map}` or `{:error, reason}`.
   """
+  @spec update_cron(String.t(), map()) :: {:ok, map()} | {:error, term()}
   def update_cron(cron_id, attrs) do
     url = base_url()
 
@@ -114,6 +120,7 @@ defmodule IamqSidecar.MqClient do
   Delete a cron schedule.
   Returns `:ok` or `{:error, reason}`.
   """
+  @spec delete_cron(String.t()) :: :ok | {:error, term()}
   def delete_cron(cron_id) do
     url = base_url()
 
@@ -124,18 +131,27 @@ defmodule IamqSidecar.MqClient do
     end
   end
 
+  @spec send_message(String.t(), String.t(), String.t() | map(), keyword()) ::
+          {:ok, map()} | {:error, term()}
   def send_message(to, subject, body, opts \\ []),
     do: GenServer.call(__MODULE__, {:send, to, subject, body, opts})
 
+  @spec broadcast(String.t(), String.t() | map(), keyword()) ::
+          {:ok, map()} | {:error, term()}
   def broadcast(subject, body, opts \\ []),
     do: send_message("broadcast", subject, body, opts)
 
+  @spec inbox(String.t()) :: {:ok, list(map())} | {:error, term()}
   def inbox(status \\ "unread"), do: GenServer.call(__MODULE__, {:inbox, status})
 
+  @spec ack(String.t(), String.t()) :: :ok | {:error, term()}
   def ack(message_id, status \\ "read"),
     do: GenServer.call(__MODULE__, {:ack, message_id, status})
 
+  @spec agents() :: {:ok, list(map())} | {:error, term()}
   def agents, do: GenServer.call(__MODULE__, :agents)
+
+  @spec status() :: {:ok, map()} | {:error, term()}
   def status, do: GenServer.call(__MODULE__, :status)
 
   # --- init ---

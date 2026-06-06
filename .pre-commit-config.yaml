@@ -1,0 +1,22 @@
+# Pre-commit hooks for openclaw-main-agent
+# Install: pip install pre-commit && pre-commit install
+repos:
+  - repo: local
+    hooks:
+      - id: mix-format
+        name: mix format (check)
+        entry: bash -c 'cd iamq && mix format --check-formatted'
+        language: system
+        pass_filenames: false
+
+      - id: mix-credo
+        name: mix credo (strict)
+        entry: bash -c 'cd iamq && mix credo --strict || true'
+        language: system
+        pass_filenames: false
+
+      - id: mix-test
+        name: mix test
+        entry: bash -c 'cd iamq && mix test'
+        language: system
+        pass_filenames: false
