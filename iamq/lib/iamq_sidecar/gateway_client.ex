@@ -17,6 +17,7 @@ defmodule IamqSidecar.Gateway.Client do
   Send a Telegram message via the OpenClaw gateway.
   Returns :ok or {:error, reason}.
   """
+  @spec send_telegram(map() | String.t()) :: :ok | {:error, term()}
   def send_telegram(message) do
     gateway_url = System.get_env("OPENCLAW_GATEWAY_URL", @default_gateway_url)
     token = System.get_env("OPENCLAW_GATEWAY_TOKEN", "")
@@ -65,21 +66,22 @@ defmodule IamqSidecar.Gateway.Client do
   defp start_link_sync(gateway_url, token, payload) do
     caller = self()
 
-    _spawn_result = spawn_monitor(fn ->
-      case start_link({gateway_url, token, payload, self()}) do
-        {:ok, _pid} ->
-          receive do
-            {:gateway_result, result} ->
-              send(caller, {:gateway_result, result})
-          after
-            15_000 ->
-              send(caller, {:gateway_result, {:error, :timeout}})
-          end
+    _spawn_result =
+      spawn_monitor(fn ->
+        case start_link({gateway_url, token, payload, self()}) do
+          {:ok, _pid} ->
+            receive do
+              {:gateway_result, result} ->
+                send(caller, {:gateway_result, result})
+            after
+              15_000 ->
+                send(caller, {:gateway_result, {:error, :timeout}})
+            end
 
-        {:error, reason} ->
-          send(caller, {:gateway_result, {:error, reason}})
-      end
-    end)
+          {:error, reason} ->
+            send(caller, {:gateway_result, {:error, reason}})
+        end
+      end)
 
     receive do
       {:gateway_result, result} -> result
@@ -92,17 +94,26 @@ defmodule IamqSidecar.Gateway.Client do
     # Inside Docker, we need host.docker.internal to reach the gateway.
     # Pass the token explicitly so the CLI doesn't require interactive auth.
     gateway_token = System.get_env("OPENCLAW_GATEWAY_TOKEN", "")
-    Logger.info("[Gateway] CLI fallback: openclaw agent --agent main --message #{inspect(content)}")
+
+    Logger.info(
+      "[Gateway] CLI fallback: openclaw agent --agent main --message #{inspect(content)}"
+    )
 
     env = [
       {"OPENCLAW_GATEWAY_URL", "ws://host.docker.internal:18789"},
       {"OPENCLAW_GATEWAY_TOKEN", gateway_token}
     ]
 
-    {output, exit_code} = System.cmd("openclaw", [
-      "agent", "--agent", "main",
-      "--message", content
-    ], env: env)
+    {output, exit_code} =
+      System.cmd(
+        "openclaw",
+        [
+          "agent",
+          "--agent",
+          "main",
+          "--message",
+          content
+        ], env: env)
 
     if exit_code == 0 do
       Logger.info("[Gateway] CLI fallback succeeded")
@@ -115,7 +126,8 @@ defmodule IamqSidecar.Gateway.Client do
 
   defp write_inbox_fallback(content) do
     # Last resort: write to the main agent inbox file
-    inbox_path = Path.join(System.get_env("HOME", "/root"), ".openclaw/workspace/queue/main/.pending")
+    inbox_path =
+      Path.join(System.get_env("HOME", "/root"), ".openclaw/workspace/queue/main/.pending")
 
     with :ok <- File.mkdir_p(Path.dirname(inbox_path)),
          :ok <- File.write(inbox_path, "[IAMQ fallback] #{content}\n", [:append]) do
@@ -130,6 +142,8 @@ defmodule IamqSidecar.Gateway.Client do
 
   # --- WebSockex callbacks ---
 
+  @spec start_link({String.t(), String.t(), map(), pid()}) ::
+          {:ok, pid()} | {:error, term()}
   def start_link({gateway_url, token, delivery_payload, caller}) do
     state = %{
       gateway_url: gateway_url,
@@ -201,20 +215,23 @@ defmodule IamqSidecar.Gateway.Client do
     signed_at_ms = System.system_time(:millisecond)
     scopes = []
 
-    device_auth_payload = build_device_auth_payload_v3(%{
-      device_id: identity["deviceId"],
-      client_id: "gateway-client",
-      client_mode: "backend",
-      role: "operator",
-      scopes: scopes,
-      signed_at_ms: signed_at_ms,
-      token: state.token,
-      nonce: nonce,
-      platform: "elixir",
-      device_family: "server"
-    })
+    device_auth_payload =
+      build_device_auth_payload_v3(%{
+        device_id: identity["deviceId"],
+        client_id: "gateway-client",
+        client_mode: "backend",
+        role: "operator",
+        scopes: scopes,
+        signed_at_ms: signed_at_ms,
+        token: state.token,
+        nonce: nonce,
+        platform: "elixir",
+        device_family: "server"
+      })
 
-    signature = :crypto.sign(:eddsa, :none, device_auth_payload, [identity["private_key"], :ed25519])
+    signature =
+      :crypto.sign(:eddsa, :none, device_auth_payload, [identity["private_key"], :ed25519])
+
     signature_b64 = Base.url_encode64(signature, padding: false)
 
     connect_req = %{
@@ -248,7 +265,12 @@ defmodule IamqSidecar.Gateway.Client do
   rescue
     e ->
       Logger.error("[Gateway] handle_challenge exception: #{inspect(e)}")
-      send(state.caller, {:gateway_result, {:error, "challenge handler exception: #{inspect(e)}"}})
+
+      send(
+        state.caller,
+        {:gateway_result, {:error, "challenge handler exception: #{inspect(e)}"}}
+      )
+
       {:close, %{state | status: :closing}}
   end
 
@@ -274,7 +296,8 @@ defmodule IamqSidecar.Gateway.Client do
       }
     }
 
-    {:reply, {:text, Jason.encode!(send_req)}, %{state | req_id: state.req_id + 1, status: :authenticated}}
+    {:reply, {:text, Jason.encode!(send_req)},
+     %{state | req_id: state.req_id + 1, status: :authenticated}}
   end
 
   defp handle_auth_response(id, payload, state) do
@@ -319,8 +342,13 @@ defmodule IamqSidecar.Gateway.Client do
     end
   rescue
     e ->
-      Logger.warning("[Gateway] Failed to load identity: #{inspect(e)} — generating fresh IAMQ identity")
-      iamq_path = Path.join(System.get_env("HOME", "/root"), ".openclaw/iamq-device-identity.json")
+      Logger.warning(
+        "[Gateway] Failed to load identity: #{inspect(e)} — generating fresh IAMQ identity"
+      )
+
+      iamq_path =
+        Path.join(System.get_env("HOME", "/root"), ".openclaw/iamq-device-identity.json")
+
       generate_and_persist_identity(iamq_path)
   end
 
@@ -333,7 +361,11 @@ defmodule IamqSidecar.Gateway.Client do
          private_key <- decode_pem_private_key(json["privateKeyPem"]),
          public_key <- decode_pem_public_key(json["publicKeyPem"]) do
       device_id = json["deviceId"]
-      Logger.info("[Gateway] System device loaded: deviceId=#{device_id}, pubKey bytes=#{byte_size(public_key)}, privKey bytes=#{byte_size(private_key)}")
+
+      Logger.info(
+        "[Gateway] System device loaded: deviceId=#{device_id}, pubKey bytes=#{byte_size(public_key)}, privKey bytes=#{byte_size(private_key)}"
+      )
+
       %{
         "deviceId" => device_id,
         "private_key" => private_key,
@@ -343,9 +375,11 @@ defmodule IamqSidecar.Gateway.Client do
       {:error, reason} ->
         Logger.error("[Gateway] Failed to read system device identity: #{inspect(reason)}")
         raise "Cannot load system device identity: #{inspect(reason)}"
+
       {:error, _, _} ->
         Logger.error("[Gateway] Failed to parse system device identity JSON")
         raise "Cannot parse system device identity JSON"
+
       _ ->
         Logger.error("[Gateway] Unexpected error loading system device identity")
         raise "Unexpected error loading system device identity"
@@ -386,7 +420,11 @@ defmodule IamqSidecar.Gateway.Client do
          {:ok, private_key} <- Base.url_decode64(Map.get(json, "private_key"), padding: false),
          {:ok, public_key} <- Base.url_decode64(Map.get(json, "public_key"), padding: false) do
       device_id = Map.get(json, "device_id")
-      Logger.info("[Gateway] IAMQ identity loaded: deviceId=#{device_id}, pubKey bytes=#{byte_size(public_key)}, privKey bytes=#{byte_size(private_key)}")
+
+      Logger.info(
+        "[Gateway] IAMQ identity loaded: deviceId=#{device_id}, pubKey bytes=#{byte_size(public_key)}, privKey bytes=#{byte_size(private_key)}"
+      )
+
       %{
         "deviceId" => device_id,
         "private_key" => private_key,
@@ -427,6 +465,7 @@ defmodule IamqSidecar.Gateway.Client do
     if msg["body"] do
       try do
         body_json = Jason.decode!(msg["body"])
+
         if body_json["action"] == "deliver_report" && body_json["report"] do
           report = body_json["report"]
           content = report["content"] || ""
@@ -434,15 +473,15 @@ defmodule IamqSidecar.Gateway.Client do
           return_content = "📊 *#{filename}*\n\n#{content}"
           "[GitRepo] Weekly Report from #{from}\n#{return_content}"
         else
-          "[IAMQ] #{from}: #{subject}" <> (if body != "", do: "\n#{body}", else: "")
+          "[IAMQ] #{from}: #{subject}" <> if body != "", do: "\n#{body}", else: ""
         end
       rescue
-        _ -> "[IAMQ] #{from}: #{subject}" <> (if body != "", do: "\n#{body}", else: "")
+        _ -> "[IAMQ] #{from}: #{subject}" <> if body != "", do: "\n#{body}", else: ""
       end
     else
       "[IAMQ] #{from}: #{subject}"
     end
+  end
 
   defp format_message(_), do: "[IAMQ] New message received"
-
 end
