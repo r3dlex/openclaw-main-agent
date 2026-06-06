@@ -210,6 +210,45 @@ defmodule IamqSidecar.MqWsClientTest do
     end
   end
 
+  # --- handle_push rescue branch (L112-116) -----------------------------
+  #
+  # When WebSockex.send_frame raises (e.g. because the WS client is not
+  # registered, or its mailbox is full), handle_push's rescue swallows
+  # the error and returns :ok. We mock WebSockex.send_frame to raise
+  # to exercise this branch. Drive the path through handle_frame with
+  # a new_message event so handle_push is called and tries to ack.
+
+  describe "handle_push/1 — WebSockex.send_frame rescue" do
+    setup do
+      :meck.new(WebSockex, [:passthrough])
+      :meck.expect(WebSockex, :send_frame, fn _mod, _frame -> raise "ws not connected" end)
+      on_exit(fn -> :meck.unload() end)
+      :ok
+    end
+
+    test "swallows send_frame errors and returns :ok from handle_frame" do
+      :ok = StubServer.reset()
+
+      msg = %{
+        "id" => "msg-1",
+        "from" => "a",
+        "subject" => "s",
+        "type" => "info"
+      }
+
+      frame = {:text, Jason.encode!(%{event: "new_message", message: msg})}
+
+      # The rescue branch fires — handle_frame should return {:ok, state}
+      # because handle_push catches the send_frame error and returns :ok.
+      # If the rescue didn't fire, the test process would crash.
+      assert {:ok, state} = MqWsClient.handle_frame(frame, @base_state)
+      assert state == @base_state
+
+      # send_telegram was called (the gateway mock absorbed it)
+      assert :meck.called(IamqSidecar.Gateway.Client, :send_telegram, [msg])
+    end
+  end
+
   # --- handle_info/2 -----------------------------------------------------
 
   describe "handle_info/2" do

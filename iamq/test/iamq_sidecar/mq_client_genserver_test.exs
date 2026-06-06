@@ -469,4 +469,319 @@ defmodule IamqSidecar.MqClientGenServerTest do
       assert :sys.get_state(pid) == state_before
     end
   end
+
+  # --- parse_int / parse_caps (init/1 env var handling) -----------------
+  #
+  # parse_int and parse_caps are private helpers called from init/1 when
+  # reading IAMQ_HEARTBEAT_MS / IAMQ_POLL_MS / IAMQ_AGENT_CAPABILITIES.
+  # We exercise the nil branch (L339), invalid-integer branch (L345),
+  # and empty-string branch (L348) by setting env vars to those values
+  # and inspecting the GenServer's config map.
+
+  describe "init/1 env var parsing" do
+    test "uses default heartbeat_ms when IAMQ_HEARTBEAT_MS is unset", %{bypass: bypass} do
+      ref = make_ref()
+      test_pid = self()
+      System.delete_env("IAMQ_HEARTBEAT_MS")
+
+      Bypass.expect(bypass, handler(%{{"POST", "register"} => {200, %{ok: true}}}, test_pid, ref))
+      start_supervised!(MqClient)
+      wait_for_register(ref)
+
+      state = :sys.get_state(MqClient)
+      # Default is 300_000 (5 minutes) per @default_heartbeat_ms
+      assert state.config.heartbeat_ms == 300_000
+    end
+
+    test "falls back to default when IAMQ_HEARTBEAT_MS is not a valid integer", %{bypass: bypass} do
+      ref = make_ref()
+      test_pid = self()
+      System.put_env("IAMQ_HEARTBEAT_MS", "not-a-number")
+
+      Bypass.expect(bypass, handler(%{{"POST", "register"} => {200, %{ok: true}}}, test_pid, ref))
+      start_supervised!(MqClient)
+      wait_for_register(ref)
+
+      state = :sys.get_state(MqClient)
+      assert state.config.heartbeat_ms == 300_000
+    end
+
+    test "parses IAMQ_HEARTBEAT_MS as integer when valid", %{bypass: bypass} do
+      ref = make_ref()
+      test_pid = self()
+      System.put_env("IAMQ_HEARTBEAT_MS", "1234")
+
+      Bypass.expect(bypass, handler(%{{"POST", "register"} => {200, %{ok: true}}}, test_pid, ref))
+      start_supervised!(MqClient)
+      wait_for_register(ref)
+
+      state = :sys.get_state(MqClient)
+      assert state.config.heartbeat_ms == 1234
+    end
+
+    test "parses IAMQ_AGENT_CAPABILITIES as empty list when unset/empty", %{bypass: bypass} do
+      ref = make_ref()
+      test_pid = self()
+      System.put_env("IAMQ_AGENT_CAPABILITIES", "")
+
+      Bypass.expect(bypass, handler(%{{"POST", "register"} => {200, %{ok: true}}}, test_pid, ref))
+      start_supervised!(MqClient)
+      wait_for_register(ref)
+
+      state = :sys.get_state(MqClient)
+      assert state.config.agent_caps == []
+    end
+  end
+
+  # --- Req error clauses (do_* helpers) ---------------------------------
+  #
+  # Each do_* helper has a `{:error, reason} -> {:error, reason}` clause
+  # that fires when Req returns a non-{:ok, _} result (e.g. connection
+  # refused, timeout). We exercise these by:
+  #   1. Starting the GenServer (init/1's :register hits the bypass)
+  #   2. Waiting for register to complete
+  #   3. Mocking Req to return `{:error, :econnrefused}`
+  #   4. Driving the GenServer call/info
+
+  describe "Req error clauses" do
+    setup do
+      :meck.new(Req, [:passthrough])
+      on_exit(fn -> :meck.unload() end)
+      :ok
+    end
+
+    test ":send returns {:error, :econnrefused} when Req.post fails", %{bypass: bypass} do
+      ref = make_ref()
+      test_pid = self()
+      Bypass.expect(bypass, handler(%{{"POST", "register"} => {200, %{ok: true}}}, test_pid, ref))
+      start_supervised!(MqClient)
+      wait_for_register(ref)
+
+      :meck.expect(Req, :post, fn _url, _opts -> {:error, :econnrefused} end)
+      assert {:error, :econnrefused} = MqClient.send_message("to", "subj", "body", [])
+    end
+
+    test ":ack returns {:error, :econnrefused} when Req.patch fails", %{bypass: bypass} do
+      ref = make_ref()
+      test_pid = self()
+      Bypass.expect(bypass, handler(%{{"POST", "register"} => {200, %{ok: true}}}, test_pid, ref))
+      start_supervised!(MqClient)
+      wait_for_register(ref)
+
+      :meck.expect(Req, :patch, fn _url, _opts -> {:error, :econnrefused} end)
+      assert {:error, :econnrefused} = MqClient.ack("msg-1")
+    end
+
+    test ":inbox returns {:error, :econnrefused} when Req.get fails", %{bypass: bypass} do
+      ref = make_ref()
+      test_pid = self()
+      Bypass.expect(bypass, handler(%{{"POST", "register"} => {200, %{ok: true}}}, test_pid, ref))
+      start_supervised!(MqClient)
+      wait_for_register(ref)
+
+      :meck.expect(Req, :get, fn _url, _opts -> {:error, :econnrefused} end)
+      assert {:error, :econnrefused} = MqClient.inbox()
+    end
+
+    test ":send non-2xx returns {:error, _} (covers L299 match)", %{bypass: bypass} do
+      ref = make_ref()
+      test_pid = self()
+      Bypass.expect(bypass, handler(%{{"POST", "register"} => {200, %{ok: true}}}, test_pid, ref))
+      start_supervised!(MqClient)
+      wait_for_register(ref)
+
+      :meck.expect(Req, :post, fn _url, _opts ->
+        {:ok, %{status: 500, body: %{error: "downstream"}}}
+      end)
+
+      assert {:error, msg} = MqClient.send_message("to", "s", "b", [])
+      assert msg =~ "HTTP 500"
+    end
+
+    test ":ack non-2xx returns {:error, _} (covers L310 match)", %{bypass: bypass} do
+      ref = make_ref()
+      test_pid = self()
+      Bypass.expect(bypass, handler(%{{"POST", "register"} => {200, %{ok: true}}}, test_pid, ref))
+      start_supervised!(MqClient)
+      wait_for_register(ref)
+
+      :meck.expect(Req, :patch, fn _url, _opts ->
+        {:ok, %{status: 500, body: %{error: "boom"}}}
+      end)
+
+      assert {:error, msg} = MqClient.ack("msg-1")
+      assert msg =~ "HTTP 500"
+    end
+
+    test ":agents non-200 returns {:error, _} (covers L318 match)", %{bypass: bypass} do
+      ref = make_ref()
+      test_pid = self()
+      Bypass.expect(bypass, handler(%{{"POST", "register"} => {200, %{ok: true}}}, test_pid, ref))
+      start_supervised!(MqClient)
+      wait_for_register(ref)
+
+      :meck.expect(Req, :get, fn _url, _opts ->
+        {:ok, %{status: 500, body: %{error: "boom"}}}
+      end)
+
+      assert {:error, msg} = MqClient.agents()
+      assert msg =~ "HTTP 500"
+    end
+
+    test ":register non-2xx increments consecutive_failures (covers L257 match)", %{bypass: bypass} do
+      ref = make_ref()
+      test_pid = self()
+      Bypass.expect(bypass, handler(%{{"POST", "register"} => {200, %{ok: true}}}, test_pid, ref))
+      start_supervised!(MqClient)
+      wait_for_register(ref)
+
+      # After register succeeded, mock Req to fail on next call.
+      :meck.expect(Req, :post, fn _url, _opts ->
+        {:ok, %{status: 500, body: %{error: "boom"}}}
+      end)
+
+      # First register call succeeded (state.registered=true). After
+      # mocking Req to fail, the next :register will set
+      # consecutive_failures to 1 (registered stays true until 5 fails).
+      send(MqClient, :register)
+      state = :sys.get_state(MqClient)
+      assert state.consecutive_failures == 1
+    end
+
+    test ":heartbeat non-2xx increments consecutive_failures (covers L268 match)", %{bypass: bypass} do
+      ref = make_ref()
+      test_pid = self()
+      Bypass.expect(bypass, handler(%{{"POST", "register"} => {200, %{ok: true}}}, test_pid, ref))
+      start_supervised!(MqClient)
+      wait_for_register(ref)
+
+      :meck.expect(Req, :post, fn _url, _opts ->
+        {:ok, %{status: 500, body: %{error: "boom"}}}
+      end)
+
+      send(MqClient, :heartbeat)
+      state = :sys.get_state(MqClient)
+      assert state.consecutive_failures == 1
+    end
+
+    test "do_register Req error clause (covers L258 match)", %{bypass: bypass} do
+      ref = make_ref()
+      test_pid = self()
+      Bypass.expect(bypass, handler(%{{"POST", "register"} => {200, %{ok: true}}}, test_pid, ref))
+      start_supervised!(MqClient)
+      wait_for_register(ref)
+
+      :meck.expect(Req, :post, fn _url, _opts -> {:error, :econnrefused} end)
+      send(MqClient, :register)
+      state = :sys.get_state(MqClient)
+      assert state.consecutive_failures == 1
+    end
+
+    test "do_heartbeat Req error clause (covers L269 match)", %{bypass: bypass} do
+      ref = make_ref()
+      test_pid = self()
+      Bypass.expect(bypass, handler(%{{"POST", "register"} => {200, %{ok: true}}}, test_pid, ref))
+      start_supervised!(MqClient)
+      wait_for_register(ref)
+
+      :meck.expect(Req, :post, fn _url, _opts -> {:error, :econnrefused} end)
+      send(MqClient, :heartbeat)
+      state = :sys.get_state(MqClient)
+      assert state.consecutive_failures == 1
+    end
+
+    test "do_poll_inbox :messages-keyed body (covers L278)", %{bypass: bypass} do
+      ref = make_ref()
+      test_pid = self()
+      System.put_env("IAMQ_POLL_MS", "60000")
+
+      Bypass.expect(
+        bypass,
+        handler(
+          %{
+            {"POST", "register"} => {200, %{ok: true}},
+            {"GET", "inbox/test-agent"} =>
+              {200, %{"messages" => [%{"id" => "m1"}]}}
+          },
+          test_pid,
+          ref
+        )
+      )
+
+      start_supervised!(MqClient)
+      wait_for_register(ref)
+      send(MqClient, :poll_inbox)
+      assert_receive({:bypass_request, ^ref, {"GET", "inbox/test-agent"}}, 2_000)
+    end
+
+    test "do_poll_inbox :list body (covers L279)", %{bypass: bypass} do
+      ref = make_ref()
+      test_pid = self()
+      System.put_env("IAMQ_POLL_MS", "60000")
+
+      Bypass.expect(
+        bypass,
+        handler(
+          %{
+            {"POST", "register"} => {200, %{ok: true}},
+            {"GET", "inbox/test-agent"} => {200, [%{"id" => "m1"}]}
+          },
+          test_pid,
+          ref
+        )
+      )
+
+      start_supervised!(MqClient)
+      wait_for_register(ref)
+      send(MqClient, :poll_inbox)
+      assert_receive({:bypass_request, ^ref, {"GET", "inbox/test-agent"}}, 2_000)
+    end
+
+    test "do_poll_inbox non-2xx (covers L280)", %{bypass: bypass} do
+      ref = make_ref()
+      test_pid = self()
+      System.put_env("IAMQ_POLL_MS", "60000")
+
+      Bypass.expect(
+        bypass,
+        handler(
+          %{
+            {"POST", "register"} => {200, %{ok: true}},
+            {"GET", "inbox/test-agent"} => {500, %{error: "boom"}}
+          },
+          test_pid,
+          ref
+        )
+      )
+
+      start_supervised!(MqClient)
+      wait_for_register(ref)
+      send(MqClient, :poll_inbox)
+      assert_receive({:bypass_request, ^ref, {"GET", "inbox/test-agent"}}, 2_000)
+    end
+
+    test "do_poll_inbox Req error (covers L281)", %{bypass: bypass} do
+      ref = make_ref()
+      test_pid = self()
+      Bypass.expect(bypass, handler(%{{"POST", "register"} => {200, %{ok: true}}}, test_pid, ref))
+      start_supervised!(MqClient)
+      wait_for_register(ref)
+
+      :meck.expect(Req, :get, fn _url, _opts -> {:error, :econnrefused} end)
+      send(MqClient, :poll_inbox)
+      # The :error path doesn't crash the GenServer; verify it's alive.
+      assert Process.alive?(Process.whereis(MqClient))
+    end
+
+    test "do_get Req error clause (covers L319)", %{bypass: bypass} do
+      ref = make_ref()
+      test_pid = self()
+      Bypass.expect(bypass, handler(%{{"POST", "register"} => {200, %{ok: true}}}, test_pid, ref))
+      start_supervised!(MqClient)
+      wait_for_register(ref)
+
+      :meck.expect(Req, :get, fn _url, _opts -> {:error, :econnrefused} end)
+      assert {:error, :econnrefused} = MqClient.agents()
+    end
+  end
 end
