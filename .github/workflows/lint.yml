@@ -20,3 +20,6 @@ jobs:
 
       - name: Lint Pipeline Runner
         run: docker compose run --rm pipeline_runner poetry run ruff check .
+
+      - name: Lint IAMQ Sidecar
+        run: docker compose run --rm iamq mix format --check-formatted

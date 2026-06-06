@@ -9,16 +9,11 @@ defmodule IamqSidecar.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       aliases: aliases(),
-      # Transitional floor for the iamq/ subproject — the vendored
-      # sidecar has no real test suite yet. The cron HTTP paths
-      # (list_crons, register_cron, get_cron, update_cron,
-      # delete_cron) are covered by mq_client_test.exs; the
-      # GenServer's HTTP paths (do_get, do_register, do_heartbeat,
-      # do_poll_inbox, do_send, do_ack) require a real IAMQ endpoint
-      # or a Bypass server. Drive this floor up to 90% in a
-      # follow-up. See the openclaw-main-agent follow-up issue
-      # "iamq/: drive coverage to 90%".
-      test_coverage: [summary: [threshold: 5]],
+      # Floor for the iamq/ subproject — driven up in the iamq-ratchet
+      # wave (5 -> 25 -> 50 -> 75 -> 90). Each step is a separate PR.
+      # See the openclaw-main-agent follow-up issue "iamq/: drive
+      # coverage from 5% to 90% (ratchet the floor)".
+      test_coverage: [summary: [threshold: 25]],
       description: description(),
       docs: docs()
     ]
@@ -42,6 +37,8 @@ defmodule IamqSidecar.MixProject do
       {:jason, "~> 1.4"},
       {:req, "~> 0.5"},
       {:websockex, "~> 0.5"},
+      {:bypass, "~> 2.1", only: :test},
+      {:meck, "~> 1.2", only: :test},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
