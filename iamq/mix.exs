@@ -13,7 +13,7 @@ defmodule IamqSidecar.MixProject do
       # wave (5 -> 25 -> 35 -> 75 -> 90). Each step is a separate PR.
       # See the openclaw-main-agent follow-up issue "iamq/: drive
       # coverage from 5% to 90% (ratchet the floor)".
-      test_coverage: [summary: [threshold: 75]],
+      test_coverage: [summary: [threshold: 90]],
       description: description(),
       docs: docs()
     ]
