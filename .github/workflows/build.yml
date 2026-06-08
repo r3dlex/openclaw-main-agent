@@ -7,13 +7,34 @@ on:
     branches: [main]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  _build-self-hosted:
+    name: "build (self-hosted)"
+    runs-on: [self-hosted, ubuntu-latest]
+    continue-on-error: true
+    outputs:
+      passed: ${{ steps.mark.outputs.passed }}
     steps:
       - uses: actions/checkout@v4
-
       - name: Copy env
         run: cp .env.example .env
-
       - name: Build all container images
+        run: docker compose build
+      - id: mark
+        if: success()
+        run: echo "passed=true" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: _build-self-hosted
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Route
+        run: echo "self-hosted passed=${{ needs._build-self-hosted.outputs.passed }}"
+      - uses: actions/checkout@v4
+        if: needs._build-self-hosted.outputs.passed != 'true'
+      - name: Copy env
+        if: needs._build-self-hosted.outputs.passed != 'true'
+        run: cp .env.example .env
+      - name: Build all container images
+        if: needs._build-self-hosted.outputs.passed != 'true'
         run: docker compose build

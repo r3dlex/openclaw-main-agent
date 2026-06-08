@@ -7,19 +7,44 @@ on:
     branches: [main]
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
+  _lint-self-hosted:
+    name: "lint (self-hosted)"
+    runs-on: [self-hosted, ubuntu-latest]
+    continue-on-error: true
+    outputs:
+      passed: ${{ steps.mark.outputs.passed }}
     steps:
       - uses: actions/checkout@v4
-
       - name: Copy env
         run: cp .env.example .env
-
       - name: Build containers
         run: docker compose build
-
       - name: Lint Pipeline Runner
         run: docker compose run --rm pipeline_runner poetry run ruff check .
-
       - name: Lint IAMQ Sidecar
+        run: docker compose run --rm iamq mix format --check-formatted
+      - id: mark
+        if: success()
+        run: echo "passed=true" >> "$GITHUB_OUTPUT"
+
+  lint:
+    needs: _lint-self-hosted
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Route
+        run: echo "self-hosted passed=${{ needs._lint-self-hosted.outputs.passed }}"
+      - uses: actions/checkout@v4
+        if: needs._lint-self-hosted.outputs.passed != 'true'
+      - name: Copy env
+        if: needs._lint-self-hosted.outputs.passed != 'true'
+        run: cp .env.example .env
+      - name: Build containers
+        if: needs._lint-self-hosted.outputs.passed != 'true'
+        run: docker compose build
+      - name: Lint Pipeline Runner
+        if: needs._lint-self-hosted.outputs.passed != 'true'
+        run: docker compose run --rm pipeline_runner poetry run ruff check .
+      - name: Lint IAMQ Sidecar
+        if: needs._lint-self-hosted.outputs.passed != 'true'
         run: docker compose run --rm iamq mix format --check-formatted
