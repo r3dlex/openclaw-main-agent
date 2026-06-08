@@ -7,7 +7,29 @@ on:
     branches: [main]
 
 jobs:
+  _test-self-hosted:
+    name: "test (self-hosted)"
+    runs-on: [self-hosted, ubuntu-latest]
+    continue-on-error: true
+    outputs:
+      passed: ${{ steps.mark.outputs.passed }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Copy env
+        run: cp .env.example .env
+      - name: Build containers
+        run: docker compose build
+      - name: Run pipeline_runner tests
+        run: docker compose run --rm pipeline_runner poetry run pytest
+      - name: Run iamq tests
+        run: docker compose run --rm iamq mix test --cover
+      - id: mark
+        if: success()
+        run: echo "passed=true" >> "$GITHUB_OUTPUT"
+
   test:
+    needs: _test-self-hosted
+    if: always()
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -17,13 +39,16 @@ jobs:
           - name: iamq
             command: mix test --cover
     steps:
+      - name: Route
+        run: echo "self-hosted passed=${{ needs._test-self-hosted.outputs.passed }}"
       - uses: actions/checkout@v4
-
+        if: needs._test-self-hosted.outputs.passed != 'true'
       - name: Copy env
+        if: needs._test-self-hosted.outputs.passed != 'true'
         run: cp .env.example .env
-
       - name: Build containers
+        if: needs._test-self-hosted.outputs.passed != 'true'
         run: docker compose build
-
       - name: Run ${{ matrix.service.name }} tests
+        if: needs._test-self-hosted.outputs.passed != 'true'
         run: docker compose run --rm ${{ matrix.service.name }} ${{ matrix.service.command }}

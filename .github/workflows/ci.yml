@@ -7,14 +7,35 @@ on:
     branches: [main]
 
 jobs:
-  make-ci:
-    name: make-ci
-    runs-on: ubuntu-latest
+  _make-ci-self-hosted:
+    name: "make-ci (self-hosted)"
+    runs-on: [self-hosted, ubuntu-latest]
+    continue-on-error: true
+    outputs:
+      passed: ${{ steps.mark.outputs.passed }}
     steps:
       - uses: actions/checkout@v4
-
       - name: Copy env
         run: cp .env.example .env
-
       - name: make ci
+        run: make ci
+      - id: mark
+        if: success()
+        run: echo "passed=true" >> "$GITHUB_OUTPUT"
+
+  make-ci:
+    name: make-ci
+    needs: _make-ci-self-hosted
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Route
+        run: echo "self-hosted passed=${{ needs._make-ci-self-hosted.outputs.passed }}"
+      - uses: actions/checkout@v4
+        if: needs._make-ci-self-hosted.outputs.passed != 'true'
+      - name: Copy env
+        if: needs._make-ci-self-hosted.outputs.passed != 'true'
+        run: cp .env.example .env
+      - name: make ci
+        if: needs._make-ci-self-hosted.outputs.passed != 'true'
         run: make ci
